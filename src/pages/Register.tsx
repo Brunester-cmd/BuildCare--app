@@ -39,16 +39,36 @@ export default function Register() {
                 emailRedirectTo: `${window.location.origin}/reset-password`,
             },
         });
-        setLoading(false);
+
         if (err) {
             if (err.message.includes('already registered')) {
-                setError(t.registration_error_exists);
+                // If the user was soft-deleted, their auth record exists but profile is gone.
+                // Try to recreate the profile request.
+                const { data: restored } = await supabase.rpc('re_register_user', {
+                    p_email: form.email,
+                    p_full_name: form.fullName,
+                    p_company_name: form.companyName
+                });
+
+                if (restored) {
+                    setSubmitted(true);
+                } else {
+                    setError(t.registration_error_exists);
+                }
             } else {
                 setError(t.registration_error_generic);
             }
         } else {
+            // signUp succeeded (or fake success due to email enumeration protection).
+            // Try restoring profile just in case it was a missing profile.
+            await supabase.rpc('re_register_user', {
+                p_email: form.email,
+                p_full_name: form.fullName,
+                p_company_name: form.companyName
+            });
             setSubmitted(true);
         }
+        setLoading(false);
     }
 
     return (
