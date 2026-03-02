@@ -1208,23 +1208,25 @@ body,
   gap: 0.35rem;
   padding: 0.35rem 0.85rem;
   border-radius: 100px;
-  border: 1.5px solid transparent;
+  border: 1px solid var(--amber-500);
   font-size: 0.78rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  background: var(--slate-700);
-  color: var(--slate-400);
+  background: transparent;
+  color: var(--amber-500);
   transition: all var(--transition);
 }
 
 .status-chip:hover {
-  color: var(--slate-200);
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--amber-400);
+  border-color: var(--amber-400);
 }
 
 .status-chip--active {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: var(--amber-500);
+  background: rgba(245, 158, 11, 0.2);
+  border-color: var(--amber-400);
   color: var(--amber-400);
 }
 

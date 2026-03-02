@@ -128,7 +128,10 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                     <button
                                         key={status}
                                         className={`status-chip ${color}`}
-                                        onClick={() => onChangeStatus(order.id, status)}
+                                        onClick={() => {
+                                            onChangeStatus(order.id, status);
+                                            if (status === 'completada') onClose();
+                                        }}
                                     >
                                         <Icon size={13} />
                                         {(t as any)[`status_${status.replace('-', '')}`]}
