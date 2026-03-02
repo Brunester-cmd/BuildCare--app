@@ -105,7 +105,14 @@ export default function AdminPanel() {
     }
 
     async function toggleTenant(id: string, active: boolean) {
-        await supabase.from('tenants').update({ active: !active }).eq('id', id);
+        const newActive = !active;
+        await supabase.from('tenants').update({ active: newActive }).eq('id', id);
+        // Cascade: suspend all users when deactivating, reactivate them when activating
+        if (!newActive) {
+            await supabase.from('profiles').update({ status: 'suspended' }).eq('tenant_id', id).neq('role', 'super_admin');
+        } else {
+            await supabase.from('profiles').update({ status: 'active' }).eq('tenant_id', id).neq('role', 'super_admin');
+        }
         await load();
     }
 
