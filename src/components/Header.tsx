@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Wrench, Trash2, Search, Settings, LogOut, ChevronDown, ChevronRight,
-    UserCircle, Bell, Shield, LogIn, Lock, Clock, Camera, Globe,
+    UserCircle, Bell, Shield, LogIn, Lock, Clock, Camera, Globe, Download,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useI18n } from '../hooks/useI18n';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 interface HeaderProps {
     searchQuery: string;
@@ -21,6 +22,7 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
     const navigate = useNavigate();
     const { session, profile, tenant, isSuperAdmin, signOut, refreshProfile, updateLanguage } = useAuth();
     const { pushEnabled, loading: pushLoading, toggle: togglePush } = usePushNotifications(session?.user.id);
+    const { canInstall, promptInstall } = useInstallPrompt();
     const { t } = useI18n();
 
     const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -205,6 +207,18 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                                 )}
 
 
+
+                                <div className="dropdown-divider" />
+
+                                {canInstall && (
+                                    <button
+                                        className="dropdown-item"
+                                        onClick={() => { void promptInstall(); setUserMenuOpen(false); }}
+                                    >
+                                        <Download size={15} />
+                                        {(t as any).install_app || 'Instalar app'}
+                                    </button>
+                                )}
 
                                 <div className="dropdown-divider" />
                                 <button className="dropdown-item dropdown-item--danger" onClick={handleSignOut}>

@@ -1880,6 +1880,27 @@ body,
   color: var(--slate-400);
 }
 
+.install-app-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  background: transparent;
+  border: 1.5px solid var(--amber-500);
+  color: var(--amber-600);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  margin-top: 0.25rem;
+}
+
+.install-app-btn:hover {
+  background: var(--amber-500);
+  color: white;
+}
+
 /* Auth-specific overrides: white card needs darker label text */
 .auth-card .form-label {
   color: var(--slate-600);

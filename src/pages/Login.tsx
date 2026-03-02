@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../hooks/useI18n';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 export default function Login() {
     const { signIn } = useAuth();
     const { t } = useI18n();
+    const { canInstall, promptInstall } = useInstallPrompt();
     const navigate = useNavigate();
     const location = useLocation();
     const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/';
@@ -103,6 +105,16 @@ export default function Login() {
             </div>
 
             <p className="auth-copyright">{t.copyright}</p>
+
+            {canInstall && (
+                <button
+                    onClick={promptInstall}
+                    className="install-app-btn"
+                >
+                    <Download size={15} />
+                    {(t as any).install_app || 'Instalar app'}
+                </button>
+            )}
         </div>
     );
 }
