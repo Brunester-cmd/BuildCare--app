@@ -1713,7 +1713,7 @@ body,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fff7ed 0%, #f1f5f9 60%, #e2e8f0 100%);
+  background: #eef0f5;
   padding: 2rem 1rem;
   gap: 1.5rem;
 }
@@ -1733,18 +1733,19 @@ body,
 .auth-logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.85rem;
   margin-bottom: 1.75rem;
 }
 
 .logo-badge--lg {
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   border-radius: var(--radius-lg);
 }
 
 .auth-app-name {
-  font-size: 1.6rem;
+  font-size: 2.1rem;
   font-weight: 800;
   color: var(--slate-800);
   line-height: 1;
@@ -1752,10 +1753,11 @@ body,
 }
 
 .auth-app-sub {
-  font-size: 0.72rem;
-  color: var(--slate-500);
-  margin-top: 2px;
+  font-size: 0.88rem;
+  color: #6b8cae;
+  margin-top: 5px;
   text-align: center;
+  font-style: italic;
 }
 
 .auth-title {
@@ -1767,7 +1769,7 @@ body,
 
 .auth-subtitle {
   font-size: 0.82rem;
-  color: var(--slate-500);
+  color: #6b8cae;
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
@@ -1877,6 +1879,31 @@ body,
   font-size: 0.72rem;
   color: var(--slate-400);
 }
+
+/* Auth-specific overrides: white card needs darker label text */
+.auth-card .form-label {
+  color: var(--slate-600);
+  font-size: 0.76rem;
+}
+
+.auth-card .form-input {
+  border-radius: var(--radius-md);
+}
+
+.auth-card .form-input::placeholder {
+  color: var(--slate-500);
+}
+
+/* Forgot password: appears right of the icon row (below input) */
+.auth-card .form-label-row {
+  margin-bottom: 0.25rem;
+}
+
+.auth-card .auth-link--sm {
+  color: var(--amber-500);
+  font-weight: 500;
+}
+
 
 .auth-success {
   display: flex;

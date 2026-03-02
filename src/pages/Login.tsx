@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Wrench, Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../hooks/useI18n';
 
@@ -33,11 +33,8 @@ export default function Login() {
     return (
         <div className="auth-screen">
             <div className="auth-card">
-                {/* Logo */}
+                {/* Branding */}
                 <div className="auth-logo">
-                    <div className="logo-badge logo-badge--lg">
-                        <Wrench size={28} strokeWidth={2.5} />
-                    </div>
                     <div>
                         <h1 className="auth-app-name">BuildCare</h1>
                         <p className="auth-app-sub">{t.app_subtitle}</p>
@@ -67,12 +64,7 @@ export default function Login() {
                     </div>
 
                     <div className="form-group">
-                        <div className="form-label-row">
-                            <label className="form-label">{t.password_label}</label>
-                            <Link to="/forgot-password" className="auth-link auth-link--sm">
-                                {t.forgot_password_link}
-                            </Link>
-                        </div>
+                        <label className="form-label">{t.password_label}</label>
                         <div className="input-icon-wrap">
                             <Lock size={16} className="input-icon" />
                             <input
@@ -87,6 +79,11 @@ export default function Login() {
                             <button type="button" className="input-icon-right" onClick={() => setShowPass(!showPass)}>
                                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
+                        </div>
+                        <div style={{ textAlign: 'right', marginTop: '0.35rem' }}>
+                            <Link to="/forgot-password" className="auth-link auth-link--sm">
+                                {t.forgot_password_link}
+                            </Link>
                         </div>
                     </div>
 
