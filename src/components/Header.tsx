@@ -3,15 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Wrench, Trash2, Search, Settings, LogOut, ChevronDown, ChevronRight,
     UserCircle, Bell, Shield, LogIn, Lock, Clock, Camera, Globe, Download,
+    Palette, Check
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useI18n } from '../hooks/useI18n';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
-import { useDarkMode } from '../hooks/useDarkMode';
-import { Moon } from 'lucide-react';
-
+import { useTheme } from '../hooks/useTheme';
 interface HeaderProps {
     searchQuery: string;
     onSearchChange: (q: string) => void;
@@ -26,10 +25,11 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
     const { pushEnabled, loading: pushLoading, toggle: togglePush } = usePushNotifications(session?.user.id);
     const { canInstall, promptInstall } = useInstallPrompt();
     const { t } = useI18n();
-    const { isDark, toggleDark } = useDarkMode();
+    const { theme, setTheme } = useTheme();
 
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [showThemes, setShowThemes] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const fileRef = useRef<HTMLInputElement>(null);
@@ -192,15 +192,123 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                                             <span className={`toggle-pill ${pushEnabled ? 'toggle-pill--active' : ''}`} />
                                         </button>
 
-                                        {/* Modo nocturno */}
+                                        {/* Temas */}
                                         <button
-                                            className="dropdown-item dropdown-item--sub"
-                                            onClick={toggleDark}
+                                            className={`dropdown-item dropdown-item--sub ${showThemes ? 'active-submenu-item' : ''}`}
+                                            onClick={() => setShowThemes(!showThemes)}
+                                            style={{ display: 'flex', alignItems: 'center', width: '100%', borderBottom: showThemes ? 'none' : undefined }}
                                         >
-                                            <Moon size={14} />
-                                            {(t as any).dark_mode || 'Modo oscuro'}
-                                            <span className={`toggle-pill ${isDark ? 'toggle-pill--active' : ''}`} />
+                                            <Palette size={14} />
+                                            {(t as any).themes || 'Temas'}
+                                            <span style={{ marginLeft: 'auto' }}>
+                                                {showThemes ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                            </span>
                                         </button>
+
+                                        {showThemes && (
+                                            <div className="themes-grid-container">
+                                                <div className="themes-grid">
+                                                    <button className={`theme-card ${theme === 'azurite' ? 'active' : ''}`} onClick={() => setTheme('azurite')}>
+                                                        <div className="theme-preview theme-preview-azurite">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Ejecutivo {theme === 'azurite' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'light' ? 'active' : ''}`} onClick={() => setTheme('light')}>
+                                                        <div className="theme-preview theme-preview-light">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Claro {theme === 'light' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'dark' ? 'active' : ''}`} onClick={() => setTheme('dark')}>
+                                                        <div className="theme-preview theme-preview-dark">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Oscuro {theme === 'dark' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'earth' ? 'active' : ''}`} onClick={() => setTheme('earth')}>
+                                                        <div className="theme-preview theme-preview-earth">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Tierra {theme === 'earth' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'cherry' ? 'active' : ''}`} onClick={() => setTheme('cherry')}>
+                                                        <div className="theme-preview theme-preview-cherry">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Cálido {theme === 'cherry' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'oceanic' ? 'active' : ''}`} onClick={() => setTheme('oceanic')}>
+                                                        <div className="theme-preview theme-preview-oceanic">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Océano {theme === 'oceanic' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'mineral' ? 'active' : ''}`} onClick={() => setTheme('mineral')}>
+                                                        <div className="theme-preview theme-preview-mineral">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Mineral {theme === 'mineral' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'autumn' ? 'active' : ''}`} onClick={() => setTheme('autumn')}>
+                                                        <div className="theme-preview theme-preview-autumn">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Otoño {theme === 'autumn' && <Check size={12} />}</span>
+                                                    </button>
+
+                                                    <button className={`theme-card ${theme === 'industrial' ? 'active' : ''}`} onClick={() => setTheme('industrial')}>
+                                                        <div className="theme-preview theme-preview-industrial">
+                                                            <div className="preview-header"></div>
+                                                            <div className="preview-body">
+                                                                <div className="preview-sidebar"></div>
+                                                                <div className="preview-content"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span className="theme-card-name">Industrial {theme === 'industrial' && <Check size={12} />}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Idioma */}
                                         <div className="dropdown-item dropdown-item--sub no-hover">

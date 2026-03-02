@@ -15,17 +15,16 @@
   --amber-600: #d97706;
   --amber-glow: 0 0 20px rgba(245, 158, 11, 0.35);
 
-  --slate-50: #f8fafc;
-  --slate-100: #c0c0c0;
-  /* 25% gray */
-  --slate-200: #e2e8f0;
-  --slate-300: #cbd5e1;
-  --slate-400: #94a3b8;
-  --slate-500: #64748b;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
+  --slate-50: #faf8f5;
+  --slate-100: #f0ebe1;
+  --slate-200: #e4dcd2;
+  --slate-300: #d5c8bb;
+  --slate-400: #bfaea0;
+  --slate-500: #a39081;
+  --slate-600: #857262;
+  --slate-700: #6b5a4d;
+  --slate-800: #54463c;
+  --slate-900: #40342c;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -41,33 +40,200 @@
 
 /* ── Dark Mode Overrides ────────────────────────────────────── */
 html.dark {
-  /* WhatsApp Dark Mode color scheme approximation */
-  --slate-50: #0b141a;
-  /* App background */
-  --slate-100: #111b21;
-  /* Card background */
-  --slate-200: #202c33;
+  /* Premium Dark Mode Overrides (Zinc scale) */
+  --slate-50: #231b2d;
+  /* App background - Deep darkened version of #3f3250 */
+  --slate-100: #31263e;
+  /* Card background - Dark version of #3f3250 */
+  --slate-200: #43406f;
   /* Subdued backgrounds, borders */
-  --slate-300: #2a3942;
-  /* Borders, dividers */
-  --slate-400: #8696a0;
+  --slate-300: #55518b;
+  /* Borders, dividers - Lighter variant of #43406f */
+  --slate-400: #9c3d54;
   /* Secondary text / muted icons */
-  --slate-500: #aebac1;
-  /* Less muted text */
-  --slate-600: #d1d7db;
+  --slate-500: #b54761;
+  /* Secondary text - Lighter version of #9c3d54 */
+  --slate-600: #df8892;
+  /* Less muted text / Darker version of #e8b4b8 */
+  --slate-700: #e8b4b8;
   /* Standard text */
-  --slate-700: #e9edef;
-  /* Primary text, titles */
-  --slate-800: #f1f5f9;
-  /* Bright text */
-  --slate-900: #ffffff;
-  /* Pure white */
+  --slate-800: #f2d1d4;
+  /* Primary text, titles - Lighter version of #e8b4b8 */
+  --slate-900: #fdf5f6;
+  /* Bright text - Very light version of #e8b4b8 */
 
-  /* Keep the amber accent but slightly less harsh if needed, or stick to current */
+  /* Make shadows more prominent on dark background */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.9);
+}
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+/* ── Oceanic Theme Overrides (Teal & Mauve) ─────────────────── */
+html.theme-oceanic {
+  --slate-50: #e4cfc8;
+  /* Light Dusty Pink background */
+  --slate-100: #d6b8b0;
+  /* Slightly darker pink for cards */
+  --slate-200: #c49a91;
+  /* Darker dusty pink / borders */
+  --slate-300: #b58981;
+  /* Borders accent */
+  --slate-400: #a87e77;
+  /* Muted texts / secondary icons */
+  --slate-500: #0a4f61;
+  /* Dark Teal (muted text/accents) */
+  --slate-600: #0b5f75;
+  /* Lighter Teal secondary text */
+  --slate-700: #084352;
+  /* Standard text (Dark Teal) */
+  --slate-800: #063440;
+  /* Primary text */
+  --slate-900: #031b21;
+  /* Darkest elements */
+}
+
+/* ── Earth Theme Overrides ──────────────────────────────────── */
+html.theme-earth {
+  --slate-50: #fbfdf0;
+  /* Cream background */
+  --slate-100: #f4f7e1;
+  /* Card background */
+  --slate-200: #dbdec5;
+  /* Light sage green subdued backgrounds */
+  --slate-300: #c8ccaf;
+  /* Borders */
+  --slate-400: #aea172;
+  /* Tan/brown secondary text */
+  --slate-500: #9c8e5d;
+  /* Darker tan */
+  --slate-600: #6b778c;
+  /* Navy secondary text */
+  --slate-700: #42516b;
+  /* Navy standard text */
+  --slate-800: #273a5e;
+  /* Navy primary text */
+  --slate-900: #1a2a47;
+  /* Darkest navy */
+}
+
+/* ── Cherry Theme Overrides (Warm Formal) ───────────────────── */
+html.theme-cherry {
+  --slate-50: #463b3d;
+  /* Very Dark Wenge for background */
+  --slate-100: #574b4d;
+  /* Dark Wenge for cards */
+  --slate-200: #756667;
+  /* Wenge for subdued backgrounds, borders */
+  --slate-300: #8c7151;
+  /* Dark Bronce for strong borders/accents */
+  --slate-400: #a58253;
+  /* Bronce (secondary text / muted icons) */
+  --slate-500: #dc5554;
+  /* Cherry (muted text/accents) */
+  --slate-600: #e37a79;
+  /* Lighter Cherry */
+  --slate-700: #d4c8bc;
+  /* Darker Mistral */
+  --slate-800: #e8dbcd;
+  /* Mistral (standard text) */
+  --slate-900: #fcf3e8;
+  /* Bright Mistral (titles) */
+}
+
+/* ── Azurite Theme Overrides (Navy Formal) ──────────────────── */
+html.theme-azurite {
+  --slate-50: #192336;
+  /* Very dark Azurita for app background */
+  --slate-100: #2a3b5a;
+  /* Azurita for cards */
+  --slate-200: #3f5680;
+  /* Lighter Azurita for borders/subdued */
+  --slate-300: #a19593;
+  /* Darker Granito for strong borders/accents */
+  --slate-400: #baadaa;
+  /* Granito (secondary text/muted icons) */
+  --slate-500: #c8704c;
+  /* Cuero (muted text/accents) */
+  --slate-600: #d98462;
+  /* Lighter Cuero */
+  --slate-700: #ded5c1;
+  /* Darker Almendra */
+  --slate-800: #ece5d2;
+  /* Almendra (standard text) */
+  --slate-900: #fdf8eb;
+  /* Bright Almendra (titles) */
+}
+
+/* ── Mineral Theme Overrides (Graphite & Desert Clay) ───────── */
+html.theme-mineral {
+  --slate-50: #4a4947;
+  /* Graphite (Background) */
+  --slate-100: #585754;
+  /* Slightly lighter Graphite (Card bg) */
+  --slate-200: #676562;
+  /* Lighter borders/subdued */
+  --slate-300: #93644f;
+  /* Desert Clay mixed darker (accents) */
+  --slate-400: #b17457;
+  /* Desert Clay (secondary icons/text) */
+  --slate-500: #c2886f;
+  /* Lighter Desert Clay */
+  --slate-600: #d8d2c2;
+  /* Light Stone (muted text) */
+  --slate-700: #e2dcd0;
+  /* Lighter Light Stone */
+  --slate-800: #f1efeb;
+  /* Milk (standard text) */
+  --slate-900: #f9f7f0;
+  /* Milk (Brightest/titles) */
+}
+
+/* ── Autumn Theme Overrides (Mine Shaft & Barley Corn) ──────── */
+html.theme-autumn {
+  --slate-50: #2d2d2d;
+  /* Mine Shaft (Background) */
+  --slate-100: #3a3a3a;
+  /* Slightly lighter Mine Shaft (Card bg) */
+  --slate-200: #4a4a4a;
+  /* Lighter borders/subdued */
+  --slate-300: #856a4e;
+  /* Barley Corn mixed darker (accents) */
+  --slate-400: #a68763;
+  /* Barley Corn (secondary icons/text) */
+  --slate-500: #b89c7d;
+  /* Lighter Barley Corn */
+  --slate-600: #d7c9ae;
+  /* Akaroa (muted text) */
+  --slate-700: #e0d5c0;
+  /* Lighter Akaroa */
+  --slate-800: #e8ded2;
+  /* White Rock off-white (standard text) */
+  --slate-900: #eae0d2;
+  /* White Rock (Brightest/titles) */
+}
+
+/* ── Industrial Theme Overrides (Inkwell & Creme Brulee) ────── */
+html.theme-industrial {
+  --slate-50: #2c3639;
+  /* Inkwell (Background) */
+  --slate-100: #3f4e4f;
+  /* Lunar Eclipse (Card bg) */
+  --slate-200: #4f6162;
+  /* Lighter Lunar Eclipse borders/subdued */
+  --slate-300: #8c6a51;
+  /* Creme Brulee mixed darker (accents) */
+  --slate-400: #a27b5b;
+  /* Creme Brulee (secondary icons/text) */
+  --slate-500: #b58d6e;
+  /* Lighter Creme Brulee */
+  --slate-600: #c2baab;
+  /* Au Lait mixed darker (muted text) */
+  --slate-700: #cfc8bd;
+  /* Lighter Au Lait */
+  --slate-800: #dcd7c9;
+  /* Au Lait (standard text) */
+  --slate-900: #ebe8e0;
+  /* Bright Au Lait (titles) */
 }
 
 html,
@@ -99,7 +265,7 @@ body,
   gap: 1rem;
   padding: 0 1.5rem;
   height: 60px;
-  background: white;
+  background: var(--slate-100);
   border-bottom: 1px solid var(--slate-200);
   box-shadow: var(--shadow-sm);
 }
@@ -201,7 +367,7 @@ body,
   top: calc(100% + 8px);
   left: 0;
   z-index: 200;
-  background: white;
+  background: var(--slate-100);
   border: 1px solid var(--slate-200);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -257,7 +423,7 @@ body,
 .search-box:focus-within {
   border-color: var(--amber-400);
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
-  background: white;
+  background: var(--slate-100);
 }
 
 .search-icon {
@@ -398,7 +564,7 @@ body,
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: white;
+  background: var(--slate-100);
   border: 1px solid var(--slate-200);
   border-radius: var(--radius-md);
   color: var(--slate-600);
@@ -424,7 +590,7 @@ body,
   top: calc(100% + 8px);
   left: 0;
   z-index: 500;
-  background: white;
+  background: var(--slate-100);
   min-width: 260px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--slate-200);
@@ -482,7 +648,7 @@ body,
   border: 1px solid var(--slate-200);
   border-radius: 6px;
   font-size: 0.82rem;
-  background: white;
+  background: var(--slate-100);
   outline: none;
   color: var(--slate-700);
 }
@@ -514,7 +680,7 @@ body,
 .view-toggle {
   display: flex;
   gap: 0.25rem;
-  background: white;
+  background: var(--slate-100);
   border: 1px solid var(--slate-200);
   border-radius: var(--radius-sm);
   padding: 3px;
@@ -638,7 +804,7 @@ body,
   align-items: center;
   gap: 1rem;
   padding: 1.1rem 1.25rem;
-  background: white;
+  background: var(--slate-100);
   border: 2px solid var(--slate-200);
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -710,7 +876,7 @@ body,
   justify-content: center;
   gap: 0.75rem;
   padding: 4rem 2rem;
-  background: white;
+  background: var(--slate-100);
   border-radius: var(--radius-lg);
   color: var(--slate-400);
   border: 2px dashed var(--slate-200);
@@ -750,7 +916,7 @@ body,
 }
 
 .wo-card {
-  background: white;
+  background: var(--slate-100);
   border-radius: var(--radius-lg);
   padding: 1.2rem 1.35rem;
   box-shadow: var(--shadow-sm);
@@ -817,7 +983,7 @@ body,
 }
 
 .wo-row {
-  background: white;
+  background: var(--slate-100);
   border-radius: var(--radius-md);
   padding: 0.85rem 1rem;
   box-shadow: var(--shadow-sm);
@@ -942,7 +1108,7 @@ body,
   top: calc(100% + 4px);
   right: 0;
   z-index: 50;
-  background: white;
+  background: var(--slate-100);
   border: 1px solid var(--slate-200);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
@@ -1099,6 +1265,11 @@ body,
 .modal .form-select {
   font-size: 0.95rem;
   padding: 0.65rem 0.85rem;
+}
+
+.modal .form-input.form-input--icon,
+.modal .form-select.form-input--icon {
+  padding-left: 2.3rem;
 }
 
 .modal .form-label {
@@ -1381,7 +1552,7 @@ body,
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--slate-200);
-  background: white;
+  background: var(--slate-100);
   transition: transform var(--transition), box-shadow var(--transition);
 }
 
@@ -1415,7 +1586,7 @@ body,
   align-items: center;
   justify-content: space-between;
   padding: 0.6rem 0.8rem;
-  background: white;
+  background: var(--slate-100);
   border-top: 1px solid var(--slate-100);
 }
 
@@ -1563,7 +1734,7 @@ body,
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.25rem;
-  background: white;
+  background: var(--slate-100);
   border: 1px solid var(--slate-200);
   border-radius: var(--radius-lg);
   color: var(--slate-700);
@@ -1688,7 +1859,7 @@ body,
 .filter-search-input:focus {
   outline: none;
   border-color: var(--primary-light);
-  background: white;
+  background: var(--slate-100);
 }
 
 /* ── Recycle bin ───────────────────────────────────────────── */
@@ -1734,7 +1905,7 @@ body,
 
 /* ── Footer ────────────────────────────────────────────────── */
 .app-footer {
-  background: white;
+  background: var(--slate-100);
   border-top: 1px solid var(--slate-200);
   text-align: center;
   padding: 0.85rem;
@@ -1809,7 +1980,7 @@ body,
   align-items: center;
   gap: 0.6rem;
   color: var(--slate-500);
-  background: white !important;
+  background: var(--slate-100) !important;
   border: 1.5px solid var(--slate-200) !important;
   padding: 0.5rem 1rem;
   border-radius: 10px;
@@ -1863,7 +2034,7 @@ body,
 }
 
 .auth-card {
-  background: white;
+  background: var(--slate-100);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   padding: 2.25rem 2rem;
@@ -2280,7 +2451,7 @@ body,
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: white;
+  background: var(--slate-100);
   border: 1px solid var(--slate-200);
   border-radius: var(--radius-md);
   padding: 0.85rem 1rem;
@@ -2437,7 +2608,7 @@ body,
   padding: 5px 12px;
   border: 1.5px solid var(--slate-200);
   border-radius: 8px;
-  background: white;
+  background: var(--slate-100);
   color: var(--slate-600);
   font-size: 0.82rem;
   font-weight: 600;
@@ -2476,7 +2647,7 @@ body,
   bottom: 0;
   width: 380px;
   max-width: 95vw;
-  background: white;
+  background: var(--slate-100);
   box-shadow: -4px 0 32px rgba(0, 0, 0, 0.12);
   z-index: 91;
   display: flex;
@@ -2519,7 +2690,7 @@ body,
   height: 30px;
   border-radius: 8px;
   border: 1px solid var(--slate-200);
-  background: white;
+  background: var(--slate-100);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2549,7 +2720,7 @@ body,
   padding: 4px 8px;
   font-size: 0.82rem;
   color: var(--slate-700);
-  background: white;
+  background: var(--slate-100);
   outline: none;
 }
 
@@ -2885,7 +3056,7 @@ body,
 .language-select {
   margin-left: auto;
   border: 1px solid var(--slate-200);
-  background: white;
+  background: var(--slate-100);
   border-radius: 4px;
   padding: 2px 4px;
   font-size: 0.75rem;
@@ -2910,7 +3081,7 @@ body,
   left: 2px;
   width: 8px;
   height: 8px;
-  background: white;
+  background: var(--slate-100);
   border-radius: 50%;
   transition: all 0.2s;
 }
@@ -2921,7 +3092,7 @@ body,
 
 .toggle-pill--active::after {
   left: 14px;
-  background: white;
+  background: var(--slate-100);
 }
 
 @keyframes filterFadeIn {
@@ -2934,4 +3105,213 @@ body,
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ── Theme Picker ───────────────────────────────────────────── */
+.active-submenu-item {
+  background: var(--slate-100);
+}
+
+.themes-grid-container {
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  background: var(--slate-50);
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.themes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--slate-200);
+  background: white;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.theme-card:hover {
+  border-color: var(--slate-300);
+  background: var(--slate-50);
+}
+
+.theme-card.active {
+  border-color: var(--amber-500);
+  box-shadow: 0 0 0 1px var(--amber-500);
+}
+
+.theme-card-name {
+  font-size: 0.75rem;
+  color: var(--slate-700);
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.theme-card.active .theme-card-name {
+  color: var(--amber-600);
+  font-weight: 600;
+}
+
+.theme-preview {
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-header {
+  height: 10px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.preview-body {
+  display: flex;
+  flex: 1;
+}
+
+.preview-sidebar {
+  width: 15px;
+  background: #fff;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.preview-content {
+  flex: 1;
+  background: #f0f0f0;
+}
+
+/* Default light styles */
+.theme-preview-light .preview-header {
+  background: #ffffff;
+}
+
+.theme-preview-light .preview-sidebar {
+  background: #ffffff;
+}
+
+.theme-preview-light .preview-content {
+  background: #f0ebe1;
+}
+
+.theme-preview-dark .preview-header {
+  background: #31263e;
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-dark .preview-sidebar {
+  background: #31263e;
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-dark .preview-content {
+  background: #231b2d;
+}
+
+.theme-preview-oceanic .preview-header {
+  background: #d6b8b0;
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+.theme-preview-oceanic .preview-sidebar {
+  background: #d6b8b0;
+  border-right-color: rgba(0, 0, 0, 0.05);
+}
+
+.theme-preview-oceanic .preview-content {
+  background: #e4cfc8;
+}
+
+.theme-preview-earth .preview-header {
+  background: #f4f7e1;
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+.theme-preview-earth .preview-sidebar {
+  background: #f4f7e1;
+  border-right-color: rgba(0, 0, 0, 0.05);
+}
+
+.theme-preview-earth .preview-content {
+  background: #fbfdf0;
+}
+
+.theme-preview-cherry .preview-header {
+  background: #574b4d;
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-cherry .preview-sidebar {
+  background: #574b4d;
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-cherry .preview-content {
+  background: #463b3d;
+}
+
+.theme-preview-azurite .preview-header {
+  background: #2a3b5a;
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-azurite .preview-sidebar {
+  background: #2a3b5a;
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-azurite .preview-content {
+  background: #192336;
+}
+
+.theme-preview-mineral .preview-header {
+  background: #585754;
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-mineral .preview-sidebar {
+  background: #585754;
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-mineral .preview-content {
+  background: #4a4947;
+}
+
+.theme-preview-autumn .preview-header {
+  background: #3a3a3a;
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-autumn .preview-sidebar {
+  background: #3a3a3a;
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-autumn .preview-content {
+  background: #2d2d2d;
+}
+
+.theme-preview-industrial .preview-header {
+  background: #3f4e4f;
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-industrial .preview-sidebar {
+  background: #3f4e4f;
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-preview-industrial .preview-content {
+  background: #2c3639;
 }
