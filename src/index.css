@@ -1063,6 +1063,28 @@ body,
   font-size: 0.88rem;
 }
 
+/* Orange ghost buttons inside modals */
+.modal .btn-ghost {
+  border-color: var(--amber-500);
+  color: var(--amber-400);
+  background: transparent;
+}
+
+.modal .btn-ghost:hover {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--amber-300);
+}
+
+.modal .btn-attach {
+  border-color: var(--amber-500);
+  color: var(--amber-400);
+}
+
+.modal .btn-attach:hover {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--amber-300);
+}
+
 
 .modal-footer {
   display: flex;
