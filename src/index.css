@@ -40,16 +40,29 @@
 
 /* ── Dark Mode Overrides ────────────────────────────────────── */
 html.dark {
-  --slate-50: #0f172a;
-  --slate-100: #1e293b;
-  --slate-200: #334155;
-  --slate-300: #475569;
-  --slate-400: #64748b;
-  --slate-500: #94a3b8;
-  --slate-600: #cbd5e1;
-  --slate-700: #f1f5f9;
-  --slate-800: #f8fafc;
+  /* WhatsApp Dark Mode color scheme approximation */
+  --slate-50: #0b141a;
+  /* App background */
+  --slate-100: #111b21;
+  /* Card background */
+  --slate-200: #202c33;
+  /* Subdued backgrounds, borders */
+  --slate-300: #2a3942;
+  /* Borders, dividers */
+  --slate-400: #8696a0;
+  /* Secondary text / muted icons */
+  --slate-500: #aebac1;
+  /* Less muted text */
+  --slate-600: #d1d7db;
+  /* Standard text */
+  --slate-700: #e9edef;
+  /* Primary text, titles */
+  --slate-800: #f1f5f9;
+  /* Bright text */
   --slate-900: #ffffff;
+  /* Pure white */
+
+  /* Keep the amber accent but slightly less harsh if needed, or stick to current */
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
