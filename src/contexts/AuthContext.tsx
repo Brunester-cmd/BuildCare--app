@@ -90,8 +90,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [user, fetchProfile]);
 
     async function signIn(email: string, password: string) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return { error: error.message };
+
+        if (data?.user) {
+            const { data: prof } = await supabase
+                .from('profiles')
+                .select('status, tenant_id, role')
+                .eq('id', data.user.id)
+                .single();
+
+            if (!prof) {
+                await supabase.auth.signOut();
+                return { error: 'Tu cuenta ha sido eliminada. Debés solicitar acceso nuevamente.' };
+            }
+
+            if (prof.status === 'suspended') {
+                await supabase.auth.signOut();
+                return { error: 'Tu cuenta ha sido suspendida. Contactá al administrador.' };
+            }
+
+            if (prof.tenant_id && prof.role !== 'super_admin') {
+                const { data: ten } = await supabase
+                    .from('tenants')
+                    .select('active')
+                    .eq('id', prof.tenant_id)
+                    .single();
+
+                if (!ten || !ten.active) {
+                    await supabase.auth.signOut();
+                    return { error: 'La empresa a la que perteneces ha sido desactivada o eliminada.' };
+                }
+            }
+        }
+
         return { error: null };
     }
 
