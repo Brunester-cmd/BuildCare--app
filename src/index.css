@@ -2772,11 +2772,12 @@ body,
 }
 
 .toggle-pill--active {
-  background: var(--emerald-500);
+  background: var(--amber-500);
 }
 
 .toggle-pill--active::after {
   left: 14px;
+  background: white;
 }
 
 @keyframes filterFadeIn {
