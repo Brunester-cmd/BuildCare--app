@@ -692,7 +692,7 @@ body,
 .dashboard-controls-row {
   display: grid;
   grid-template-columns: 100px 1fr auto;
-  /* View toggle | Filters | New Order */
+  /* View toggle | New Order | Filters */
   align-items: center;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
@@ -703,11 +703,11 @@ body,
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  justify-self: flex-start;
+  justify-self: flex-end;
 }
 
 .new-order-btn {
-  justify-self: flex-end;
+  justify-self: center;
 }
 
 /* ── Work Order Grid ───────────────────────────────────────── */
@@ -1515,7 +1515,8 @@ body,
 .filter-dropdown-menu {
   position: absolute;
   top: calc(100% + 0.5rem);
-  left: 120px;
+  right: 0;
+  left: auto;
   /* Align near the filter button */
   width: 280px;
   background: var(--slate-800);

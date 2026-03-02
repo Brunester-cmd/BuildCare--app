@@ -169,6 +169,11 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     </button>
                 </div>
 
+                <button className="btn btn-primary btn-glow new-order-btn" onClick={() => setShowNewModal(true)}>
+                    <Plus size={18} />
+                    {t.new_order}
+                </button>
+
                 <div className="filter-wrapper">
                     <button
                         className={`filter-menu-toggle ${isMenuOpen || isFiltered ? 'active' : ''}`}
@@ -186,11 +191,6 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                         </button>
                     )}
                 </div>
-
-                <button className="btn btn-primary btn-glow new-order-btn" onClick={() => setShowNewModal(true)}>
-                    <Plus size={18} />
-                    {t.new_order}
-                </button>
 
                 {isMenuOpen && (
                     <div className="filter-dropdown-menu">
