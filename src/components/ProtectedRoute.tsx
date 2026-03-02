@@ -48,13 +48,13 @@ export default function ProtectedRoute({ children }: Props) {
         );
     }
 
-    // Inactive tenant (for non super_admins)
-    if (tenant && !tenant.active && profile?.role !== 'super_admin') {
+    // Inactive or missing tenant (for non super_admins)
+    if ((!tenant || !tenant.active) && profile?.role !== 'super_admin') {
         return (
             <div className="loading-screen">
                 <div className="pending-icon">🏢</div>
-                <h2>Empresa inactiva</h2>
-                <p>La empresa a la que perteneces ha sido desactivada. Contactá al administrador para más información.</p>
+                <h2>Empresa inactiva o no encontrada</h2>
+                <p>La empresa a la que perteneces ha sido desactivada o eliminada. Contactá al administrador para más información.</p>
                 <div style={{ marginTop: '2rem' }}>
                     <button className="btn btn-secondary" onClick={signOut}>Cerrar Sesión</button>
                 </div>
