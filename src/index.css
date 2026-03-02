@@ -1193,7 +1193,7 @@ body,
 }
 
 .modal {
-  background: var(--slate-800);
+  background: var(--slate-50);
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 520px;
@@ -1201,7 +1201,8 @@ body,
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.2s ease;
-  color: var(--slate-200);
+  color: var(--slate-800);
+  border: 1px solid var(--slate-200);
 }
 
 .modal--wide {
@@ -1225,13 +1226,13 @@ body,
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--slate-700);
+  border-bottom: 1px solid var(--slate-200);
 }
 
 .modal-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: white;
+  color: var(--slate-900);
 }
 
 .modal-close {
@@ -1249,8 +1250,8 @@ body,
 }
 
 .modal-close:hover {
-  background: var(--slate-700);
-  color: white;
+  background: var(--slate-100);
+  color: var(--slate-800);
 }
 
 .modal-body {
@@ -1377,16 +1378,16 @@ body,
 .form-label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--slate-300);
+  color: var(--slate-700);
 }
 
 .form-input {
   width: 100%;
   padding: 0.55rem 0.75rem;
-  background: var(--slate-700);
-  border: 1px solid var(--slate-600);
+  background: var(--slate-100);
+  border: 1px solid var(--slate-200);
   border-radius: var(--radius-sm);
-  color: var(--slate-100);
+  color: var(--slate-800);
   font-size: 0.85rem;
   font-family: inherit;
   transition: border-color var(--transition), box-shadow var(--transition);
@@ -1394,12 +1395,13 @@ body,
 }
 
 .form-input::placeholder {
-  color: var(--slate-500);
+  color: var(--slate-400);
 }
 
 .form-input:focus {
   border-color: var(--amber-500);
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+  background: var(--slate-50);
 }
 
 .form-input--error {
