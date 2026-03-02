@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import {
     MapPin, User, Tag, Calendar, MoreVertical,
-    Play, Pause, CheckCircle, Trash2, Eye,
+    Play, Pause, CheckCircle, Trash2, X, Hash,
 } from 'lucide-react';
-import { type WorkOrder, type Status, PRIORITY_LABELS, CATEGORY_LABELS, PRIORITY_COLORS } from '../types';
+import { type WorkOrder, type Status, PRIORITY_COLORS, CATEGORY_LABELS } from '../types';
+import { useI18n } from '../hooks/useI18n';
 
 interface WorkOrderCardProps {
     order: WorkOrder;
@@ -12,39 +13,55 @@ interface WorkOrderCardProps {
     onView: (order: WorkOrder) => void;
 }
 
-function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString('es-AR', {
-        day: '2-digit', month: 'short', year: 'numeric',
-    });
-}
-
-type ActionItem = { status: Status; label: string; icon: typeof Play };
-const STATUS_ACTIONS: ActionItem[] = [
-    { status: 'pendiente', label: 'Marcar Pendiente', icon: Play },
-    { status: 'en-pausa', label: 'Poner en Pausa', icon: Pause },
-    { status: 'completada', label: 'Marcar Completada', icon: CheckCircle },
-];
-
 export default function WorkOrderCard({ order, onChangeStatus, onDelete, onView }: WorkOrderCardProps) {
+    const { t, lang } = useI18n();
     const [menuOpen, setMenuOpen] = useState(false);
 
+    function formatDate(iso: string) {
+        const locale = lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-BR' : 'es-AR';
+        return new Date(iso).toLocaleDateString(locale, {
+            day: '2-digit', month: 'short', year: 'numeric',
+        });
+    }
+
+    const STATUS_ACTIONS = [
+        { status: 'pendiente', label: t.status_pendiente_btn, icon: Play },
+        { status: 'en-pausa', label: t.status_pausa_btn, icon: Pause },
+        { status: 'completada', label: t.status_completada_btn, icon: CheckCircle },
+    ] as const;
+
     return (
-        <div className="wo-card">
+        <div
+            className="wo-card wo-card--clickable"
+            onClick={() => { if (!menuOpen) onView(order); }}
+        >
             <div className="wo-card-header">
-                <span className={`priority-badge ${PRIORITY_COLORS[order.prioridad]}`}>
-                    {PRIORITY_LABELS[order.prioridad]}
-                </span>
+                <div className="wo-card-header-left">
+                    <span className={`priority-badge ${PRIORITY_COLORS[order.prioridad]}`}>
+                        {(t as any)[`priority_${order.prioridad}`]}
+                    </span>
+                    <span className="order-number-badge">
+                        <Hash size={10} />
+                        {String(order.orderNumber).padStart(4, '0')}
+                    </span>
+                </div>
                 <div className="wo-card-actions">
                     <button
                         className="icon-btn"
-                        onClick={() => setMenuOpen(!menuOpen)}
+                        onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
                         onBlur={() => setTimeout(() => setMenuOpen(false), 150)}
                     >
                         <MoreVertical size={16} />
                     </button>
                     {menuOpen && (
-                        <div className="dropdown-menu">
-                            <div className="dropdown-section-label">Cambiar estado</div>
+                        <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                            <div className="dropdown-close-row">
+                                <span className="dropdown-title">{t.actions}</span>
+                                <button className="dropdown-close-btn" onClick={() => setMenuOpen(false)} title={t.close}>
+                                    <X size={14} />
+                                </button>
+                            </div>
+                            <div className="dropdown-section-label">{t.change_status}</div>
                             {STATUS_ACTIONS.filter((a) => a.status !== order.estado).map(({ status, label, icon: Icon }) => (
                                 <button
                                     key={status}
@@ -56,23 +73,19 @@ export default function WorkOrderCard({ order, onChangeStatus, onDelete, onView 
                                 </button>
                             ))}
                             <div className="dropdown-divider" />
-                            <button className="dropdown-item" onClick={() => { onView(order); setMenuOpen(false); }}>
-                                <Eye size={14} />
-                                Ver detalle
-                            </button>
                             <button
                                 className="dropdown-item dropdown-item--danger"
                                 onClick={() => { onDelete(order.id); setMenuOpen(false); }}
                             >
                                 <Trash2 size={14} />
-                                Eliminar
+                                {t.delete}
                             </button>
                         </div>
                     )}
                 </div>
             </div>
 
-            <h3 className="wo-card-title" onClick={() => onView(order)}>{order.titulo}</h3>
+            <h3 className="wo-card-title">{order.titulo}</h3>
             {order.descripcion && <p className="wo-card-desc">{order.descripcion}</p>}
 
             <div className="wo-card-meta">
@@ -82,11 +95,15 @@ export default function WorkOrderCard({ order, onChangeStatus, onDelete, onView 
                 {order.asignadoA && (
                     <span className="meta-item"><User size={12} />{order.asignadoA}</span>
                 )}
-                <span className="meta-item"><Tag size={12} />{CATEGORY_LABELS[order.categoria]}</span>
+                <span className="meta-item">
+                    <Tag size={12} />
+                    {(t as any)[`cat_${order.categoria}`] || CATEGORY_LABELS[order.categoria]}
+                </span>
             </div>
 
             <div className="wo-card-footer">
                 <span className="meta-item"><Calendar size={12} />{formatDate(order.creadoEn)}</span>
+                <span className="wo-card-hint">{t.click_to_view}</span>
             </div>
         </div>
     );

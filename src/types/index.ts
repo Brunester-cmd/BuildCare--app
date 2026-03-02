@@ -1,38 +1,116 @@
-export type Status = 'pendiente' | 'en-pausa' | 'completada' | 'eliminada';
-export type Priority = 'baja' | 'media' | 'alta' | 'urgente';
-export type Category =
-  | 'electrico'
-  | 'plomeria'
-  | 'climatizacion'
-  | 'estructural'
-  | 'pintura'
-  | 'carpinteria'
-  | 'limpieza'
-  | 'seguridad'
-  | 'otro';
+// Database types matching Supabase schema
+export type UserRole = 'super_admin' | 'admin' | 'user';
+export type UserStatus = 'pending' | 'active' | 'suspended';
+export type WoStatus = 'pendiente' | 'en-pausa' | 'completada';
+export type WoPriority = 'baja' | 'media' | 'alta' | 'urgente';
+export type WoCategory =
+  | 'electrico' | 'plomeria' | 'climatizacion' | 'estructural'
+  | 'pintura' | 'carpinteria' | 'limpieza' | 'seguridad' | 'informatica' | 'otro';
 
+// ── Backward-compatible aliases used by UI components ──────────
+export type Status = WoStatus;
+export type Priority = WoPriority;
+export type Category = WoCategory;
+
+// ── Supabase types ─────────────────────────────────────────────
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+export interface Profile {
+  id: string;
+  tenant_id: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: UserRole;
+  status: UserStatus;
+  push_subscription: object | null;
+  push_enabled: boolean;
+  language: string;
+  company_name: string | null;
+  email?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkOrderDB {
+  id: string;
+  order_number: number;
+  tenant_id: string;
+  created_by: string | null;
+  titulo: string;
+  descripcion: string;
+  prioridad: WoPriority;
+  ubicacion: string;
+  categoria: WoCategory;
+  asignado_a: string;
+  estado: WoStatus;
+  file_url: string | null;
+  file_name: string | null;
+  attachments: Attachment[] | null;
+  deleted: boolean;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Attachment {
+  url: string;
+  name: string;
+}
+
+// ── Local WorkOrder (Supabase hook) ────────────────────────────
 export interface WorkOrder {
   id: string;
+  orderNumber: number;
   titulo: string;
   descripcion: string;
   prioridad: Priority;
   ubicacion: string;
   categoria: Category;
   asignadoA: string;
-  estado: Status;
+  estado: Status | 'eliminada';
+  attachments: Attachment[];
+  eliminadoEn?: string;
   creadoEn: string;
   actualizadoEn: string;
-  eliminadoEn?: string;
+  tenant_id?: string;
 }
 
-export const PRIORITY_LABELS: Record<Priority, string> = {
-  baja: 'Baja',
-  media: 'Media',
-  alta: 'Alta',
-  urgente: 'Urgente',
-};
 
-export const CATEGORY_LABELS: Record<Category, string> = {
+// ── History ────────────────────────────────────────────────────
+export type HistoryEventType = 'created' | 'status_changed' | 'updated' | 'deleted' | 'restored';
+
+export interface WorkOrderHistory {
+  id: string;
+  work_order_id: string;
+  tenant_id: string;
+  user_id: string | null;
+  user_name: string | null;
+  event_type: HistoryEventType;
+  old_status: string | null;
+  new_status: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+
+// ── Display constants ──────────────────────────────────────────
+export const PRIORITY_LABELS: Record<WoPriority, string> = {
+  baja: 'Baja', media: 'Media', alta: 'Alta', urgente: 'Urgente',
+};
+export const PRIORITY_COLORS: Record<WoPriority, string> = {
+  baja: 'priority-badge--baja',
+  media: 'priority-badge--media',
+  alta: 'priority-badge--alta',
+  urgente: 'priority-badge--urgente',
+};
+export const CATEGORY_LABELS: Record<WoCategory, string> = {
   electrico: 'Eléctrico',
   plomeria: 'Plomería',
   climatizacion: 'Climatización',
@@ -41,12 +119,6 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   carpinteria: 'Carpintería',
   limpieza: 'Limpieza',
   seguridad: 'Seguridad',
+  informatica: 'Informática',
   otro: 'Otro',
-};
-
-export const PRIORITY_COLORS: Record<Priority, string> = {
-  baja: 'bg-green-100 text-green-700 border-green-200',
-  media: 'bg-blue-100 text-blue-700 border-blue-200',
-  alta: 'bg-orange-100 text-orange-700 border-orange-200',
-  urgente: 'bg-red-100 text-red-700 border-red-200',
 };

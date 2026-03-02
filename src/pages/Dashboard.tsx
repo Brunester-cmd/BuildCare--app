@@ -1,40 +1,124 @@
 import { useState } from 'react';
-import { ClipboardList, PauseCircle, CheckCircle2, Plus, LayoutGrid, List, Inbox } from 'lucide-react';
+import { ClipboardList, PauseCircle, CheckCircle2, Plus, LayoutGrid, List, Inbox, SearchX, X, Filter, ChevronDown } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { useWorkOrders } from '../hooks/useWorkOrders';
-import { type WorkOrder, type Status } from '../types';
+import { type WorkOrder, type Status, type Profile } from '../types';
 import StatusCard from '../components/StatusCard';
 import WorkOrderCard from '../components/WorkOrderCard';
 import WorkOrderRow from '../components/WorkOrderRow';
 import NewOrderModal from '../components/NewOrderModal';
 import OrderDetailModal from '../components/OrderDetailModal';
+import HistoryPanel from '../components/HistoryPanel';
+import { useI18n } from '../hooks/useI18n';
 
 type ActiveFilter = 'pendiente' | 'en-pausa' | 'completada';
 
-export default function Dashboard() {
+interface DashboardProps {
+    searchQuery: string;
+    showHistory: boolean;
+    onCloseHistory: () => void;
+}
+
+export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: DashboardProps) {
     const {
+        loading,
+        allOrders,
         pendientes, enPausa, completadas,
         createOrder, updateOrder, changeStatus, deleteOrder,
+        loadHistory,
     } = useWorkOrders();
-
+    const { profile, tenant } = useAuth();
+    const { t } = useI18n();
     const [filter, setFilter] = useState<ActiveFilter>('pendiente');
     const [view, setView] = useState<'grid' | 'list'>('grid');
     const [showNewModal, setShowNewModal] = useState(false);
-    const [selectedOrder, setSelectedOrder] = useState<WorkOrder | null>(null);
+    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-    const filteredOrders: WorkOrder[] =
+    // Advanced Filters & Sort State
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+    const [priorityFilter, setPriorityFilter] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('');
+    const [assigneeFilter, setAssigneeFilter] = useState('');
+    const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+    const [members, setMembers] = useState<Profile[]>([]);
+
+    useState(() => {
+        async function fetchMembers() {
+            const tenantId = tenant?.id || profile?.tenant_id;
+            if (!tenantId) return;
+            const { data } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('tenant_id', tenantId)
+                .eq('status', 'active')
+                .order('full_name');
+            if (data) setMembers(data);
+        }
+        void fetchMembers();
+    });
+
+    const baseOrders: WorkOrder[] =
         filter === 'pendiente' ? pendientes :
             filter === 'en-pausa' ? enPausa : completadas;
 
+    const q = searchQuery.trim().toLowerCase();
+    const filteredOrders = baseOrders.filter((o) => {
+        // Search query filter
+        const matchesSearch = !q ||
+            o.titulo.toLowerCase().includes(q) ||
+            o.descripcion.toLowerCase().includes(q) ||
+            o.ubicacion.toLowerCase().includes(q) ||
+            o.asignadoA.toLowerCase().includes(q);
+
+        // Priority filter
+        const matchesPriority = !priorityFilter || o.prioridad === priorityFilter;
+
+        // Category filter
+        const matchesCategory = !categoryFilter || o.categoria === categoryFilter;
+
+        // Assignee filter
+        const matchesAssignee = !assigneeFilter || o.asignadoA.toLowerCase().includes(assigneeFilter.toLowerCase());
+
+        return matchesSearch && matchesPriority && matchesCategory && matchesAssignee;
+    });
+
+    // Sorting logic
+    filteredOrders.sort((a, b) => {
+        const dateA = new Date(a.creadoEn).getTime();
+        const dateB = new Date(b.creadoEn).getTime();
+        return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    const isFiltered = !!(priorityFilter || categoryFilter || assigneeFilter);
+
+    function clearAllFilters() {
+        setPriorityFilter('');
+        setCategoryFilter('');
+        setAssigneeFilter('');
+    }
+
     const emptyMessages: Record<ActiveFilter, string> = {
-        pendiente: 'No hay órdenes pendientes',
-        'en-pausa': 'No hay órdenes en pausa',
-        completada: 'No hay órdenes completadas',
+        pendiente: t.no_pending,
+        'en-pausa': t.no_paused,
+        completada: t.no_completed,
     };
 
-    function handleChangeStatus(id: string, status: Status) {
-        changeStatus(id, status);
-        setSelectedOrder((prev) => prev?.id === id ? { ...prev, estado: status } : prev);
+    async function handleChangeStatus(id: string, status: Status) {
+        await changeStatus(id, status);
     }
+
+    const selectedOrder = allOrders.find(o => o.id === selectedOrderId);
+
+    if (loading) return (
+        <main className="main-content">
+            <div className="loading-orders">
+                <div className="loading-spinner" />
+                <p>{t.loading_orders || 'Cargando órdenes…'}</p>
+            </div>
+        </main>
+    );
 
     return (
         <main className="main-content">
@@ -58,14 +142,14 @@ export default function Dashboard() {
                 </div>
                 <button className="btn btn-primary btn-glow" onClick={() => setShowNewModal(true)}>
                     <Plus size={18} />
-                    Nueva Orden
+                    {t.new_order}
                 </button>
             </div>
 
             {/* Status cards */}
             <div className="status-cards">
                 <StatusCard
-                    label="Pendientes"
+                    label={t.pendientes}
                     count={pendientes.length}
                     icon={ClipboardList}
                     isActive={filter === 'pendiente'}
@@ -73,7 +157,7 @@ export default function Dashboard() {
                     colorClass="status-icon--amber"
                 />
                 <StatusCard
-                    label="En Pausa"
+                    label={t.en_pausa}
                     count={enPausa.length}
                     icon={PauseCircle}
                     isActive={filter === 'en-pausa'}
@@ -81,7 +165,7 @@ export default function Dashboard() {
                     colorClass="status-icon--blue"
                 />
                 <StatusCard
-                    label="Completadas"
+                    label={t.completadas}
                     count={completadas.length}
                     icon={CheckCircle2}
                     isActive={filter === 'completada'}
@@ -90,11 +174,177 @@ export default function Dashboard() {
                 />
             </div>
 
+            {/* Filter Menu Toggle */}
+            <div className="filter-container">
+                <button
+                    className={`filter-menu-toggle ${isMenuOpen || isFiltered ? 'active' : ''}`}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                    <Filter size={18} />
+                    <span>{t.filters_title}</span>
+                    <ChevronDown size={14} style={{ transform: isMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                </button>
+
+                {isFiltered && (
+                    <button className="clear-filters-btn" onClick={clearAllFilters} style={{ margin: 0, height: '38px' }}>
+                        <X size={16} />
+                        {t.clear_filters}
+                    </button>
+                )}
+
+                {isMenuOpen && (
+                    <div className="filter-dropdown-menu">
+                        {/* Sort Section */}
+                        <div className="filter-menu-section">
+                            <button
+                                className="filter-submenu-toggle"
+                                onClick={() => setActiveSubmenu(activeSubmenu === 'sort' ? null : 'sort')}
+                            >
+                                <label className="filter-menu-label">{t.filter_date}</label>
+                                <ChevronDown size={14} style={{ transform: activeSubmenu === 'sort' ? 'rotate(180deg)' : 'none' }} />
+                            </button>
+                            {activeSubmenu === 'sort' && (
+                                <div className="filter-submenu-content">
+                                    <div className="filter-menu-grid">
+                                        <button
+                                            className={`filter-option ${sortOrder === 'newest' ? 'active' : ''}`}
+                                            onClick={() => setSortOrder('newest')}
+                                        >
+                                            {t.sort_newest}
+                                        </button>
+                                        <button
+                                            className={`filter-option ${sortOrder === 'oldest' ? 'active' : ''}`}
+                                            onClick={() => setSortOrder('oldest')}
+                                        >
+                                            {t.sort_oldest}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Priority Section */}
+                        <div className="filter-menu-section">
+                            <button
+                                className="filter-submenu-toggle"
+                                onClick={() => setActiveSubmenu(activeSubmenu === 'priority' ? null : 'priority')}
+                            >
+                                <label className="filter-menu-label">{t.filter_priority}</label>
+                                <ChevronDown size={14} style={{ transform: activeSubmenu === 'priority' ? 'rotate(180deg)' : 'none' }} />
+                            </button>
+                            {activeSubmenu === 'priority' && (
+                                <div className="filter-submenu-content">
+                                    <div className="filter-menu-grid">
+                                        <button
+                                            className={`filter-option ${priorityFilter === '' ? 'active' : ''}`}
+                                            onClick={() => setPriorityFilter('')}
+                                        >
+                                            {t.all_priorities}
+                                        </button>
+                                        {['baja', 'media', 'alta', 'urgente'].map(p => (
+                                            <button
+                                                key={p}
+                                                className={`filter-option ${priorityFilter === p ? 'active' : ''}`}
+                                                onClick={() => setPriorityFilter(p)}
+                                            >
+                                                {(t as any)[`priority_${p}`]}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Category Section */}
+                        <div className="filter-menu-section">
+                            <button
+                                className="filter-submenu-toggle"
+                                onClick={() => setActiveSubmenu(activeSubmenu === 'category' ? null : 'category')}
+                            >
+                                <label className="filter-menu-label">{t.filter_category}</label>
+                                <ChevronDown size={14} style={{ transform: activeSubmenu === 'category' ? 'rotate(180deg)' : 'none' }} />
+                            </button>
+                            {activeSubmenu === 'category' && (
+                                <div className="filter-submenu-content">
+                                    <div className="filter-menu-grid">
+                                        <button
+                                            className={`filter-option ${categoryFilter === '' ? 'active' : ''}`}
+                                            onClick={() => setCategoryFilter('')}
+                                        >
+                                            {t.all_categories}
+                                        </button>
+                                        {[
+                                            'electrico', 'plomeria', 'climatizacion', 'estructural',
+                                            'pintura', 'carpinteria', 'limpieza', 'seguridad',
+                                            'informatica', 'otro'
+                                        ].map(c => (
+                                            <button
+                                                key={c}
+                                                className={`filter-option ${categoryFilter === c ? 'active' : ''}`}
+                                                onClick={() => setCategoryFilter(c)}
+                                            >
+                                                {(t as any)[`cat_${c}`]}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Assignee Section */}
+                        <div className="filter-menu-section">
+                            <button
+                                className="filter-submenu-toggle"
+                                onClick={() => setActiveSubmenu(activeSubmenu === 'assignee' ? null : 'assignee')}
+                            >
+                                <label className="filter-menu-label">{t.filter_assignee}</label>
+                                <ChevronDown size={14} style={{ transform: activeSubmenu === 'assignee' ? 'rotate(180deg)' : 'none' }} />
+                            </button>
+                            {activeSubmenu === 'assignee' && (
+                                <div className="filter-submenu-content">
+                                    <div className="filter-menu-grid">
+                                        <button
+                                            className={`filter-option ${assigneeFilter === '' ? 'active' : ''}`}
+                                            onClick={() => setAssigneeFilter('')}
+                                        >
+                                            {(t as any).all_assignees || 'Todos los operarios'}
+                                        </button>
+                                        {members.map(m => {
+                                            const name = m.full_name || m.email || '';
+                                            return (
+                                                <button
+                                                    key={m.id}
+                                                    className={`filter-option ${assigneeFilter === name ? 'active' : ''}`}
+                                                    onClick={() => setAssigneeFilter(name)}
+                                                >
+                                                    {m.full_name || m.email}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+
+            {/* Search result info */}
+            {q && (
+                <p className="search-result-info">
+                    {filteredOrders.length === 0
+                        ? (t.no_results_for?.replace('{query}', searchQuery) || `Sin resultados para "${searchQuery}"`)
+                        : (t.results_found?.replace('{count}', String(filteredOrders.length)).replace('{query}', searchQuery) ||
+                            `${filteredOrders.length} resultado${filteredOrders.length !== 1 ? 's' : ''} para "${searchQuery}"`)}
+                </p>
+            )}
+
             {/* Orders */}
             {filteredOrders.length === 0 ? (
                 <div className="empty-state">
-                    <Inbox size={48} strokeWidth={1.2} />
-                    <p>{emptyMessages[filter]}</p>
+                    {q ? <SearchX size={48} strokeWidth={1.2} /> : <Inbox size={48} strokeWidth={1.2} />}
+                    <p>{q ? (t.no_results_for?.replace('{query}', searchQuery) || `Sin resultados para "${searchQuery}"`) : emptyMessages[filter]}</p>
                 </div>
             ) : view === 'grid' ? (
                 <div className="orders-grid">
@@ -104,7 +354,7 @@ export default function Dashboard() {
                             order={order}
                             onChangeStatus={handleChangeStatus}
                             onDelete={deleteOrder}
-                            onView={setSelectedOrder}
+                            onView={(order) => setSelectedOrderId(order.id)}
                         />
                     ))}
                 </div>
@@ -116,7 +366,7 @@ export default function Dashboard() {
                             order={order}
                             onChangeStatus={handleChangeStatus}
                             onDelete={deleteOrder}
-                            onView={setSelectedOrder}
+                            onView={(order) => setSelectedOrderId(order.id)}
                         />
                     ))}
                 </div>
@@ -132,10 +382,17 @@ export default function Dashboard() {
             {selectedOrder && (
                 <OrderDetailModal
                     order={selectedOrder}
-                    onClose={() => setSelectedOrder(null)}
+                    onClose={() => setSelectedOrderId(null)}
                     onUpdate={updateOrder}
                     onDelete={deleteOrder}
                     onChangeStatus={handleChangeStatus}
+                />
+            )}
+
+            {showHistory && (
+                <HistoryPanel
+                    onClose={onCloseHistory}
+                    loadHistory={loadHistory}
                 />
             )}
         </main>

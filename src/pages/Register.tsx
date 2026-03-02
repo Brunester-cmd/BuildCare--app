@@ -1,0 +1,145 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Wrench, Mail, User, Building2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useI18n } from '../hooks/useI18n';
+
+export default function Register() {
+    const { t } = useI18n();
+    const [form, setForm] = useState({
+        fullName: '',
+        email: '',
+        companyName: '',
+    });
+    const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    function set(field: keyof typeof form, value: string) {
+        setForm((p) => ({ ...p, [field]: value }));
+    }
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        // Sign up with a temporary random password — user will set real password via email invite
+        const tempPass = `buildcare_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const { error: err } = await supabase.auth.signUp({
+            email: form.email,
+            password: tempPass,
+            options: {
+                data: {
+                    full_name: form.fullName,
+                    company_name: form.companyName,
+                    role: 'user',
+                    status: 'pending',
+                },
+                emailRedirectTo: `${window.location.origin}/reset-password`,
+            },
+        });
+        setLoading(false);
+        if (err) {
+            if (err.message.includes('already registered')) {
+                setError(t.registration_error_exists);
+            } else {
+                setError(t.registration_error_generic);
+            }
+        } else {
+            setSubmitted(true);
+        }
+    }
+
+    return (
+        <div className="auth-screen">
+            <div className="auth-card">
+                <div className="auth-logo">
+                    <div className="logo-badge logo-badge--lg">
+                        <Wrench size={28} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                        <h1 className="auth-app-name">BuildCare</h1>
+                        <p className="auth-app-sub">{t.app_subtitle}</p>
+                    </div>
+                </div>
+
+                {submitted ? (
+                    <div className="auth-success">
+                        <CheckCircle size={48} className="auth-success-icon" />
+                        <h2 className="auth-title">{t.registration_success_title}</h2>
+                        <p className="auth-subtitle">
+                            {t.registration_success_subtitle.replace('{email}', form.email)}
+                        </p>
+                        <Link to="/login" className="btn btn-primary btn-full" style={{ marginTop: '1.5rem' }}>
+                            <ArrowLeft size={16} /> {t.back_to_login}
+                        </Link>
+                    </div>
+                ) : (
+                    <>
+                        <h2 className="auth-title">{t.register_title}</h2>
+                        <p className="auth-subtitle">{t.register_subtitle}</p>
+
+                        <form onSubmit={handleSubmit} className="auth-form">
+                            {error && <div className="auth-error">{error}</div>}
+
+                            <div className="form-group">
+                                <label className="form-label">{t.full_name}</label>
+                                <div className="input-icon-wrap">
+                                    <User size={16} className="input-icon" />
+                                    <input
+                                        type="text"
+                                        className="form-input form-input--icon"
+                                        placeholder="Juan García"
+                                        value={form.fullName}
+                                        onChange={(e) => set('fullName', e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">{t.email_label}</label>
+                                <div className="input-icon-wrap">
+                                    <Mail size={16} className="input-icon" />
+                                    <input
+                                        type="email"
+                                        className="form-input form-input--icon"
+                                        placeholder={t.email_placeholder}
+                                        value={form.email}
+                                        onChange={(e) => set('email', e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">{t.company_name}</label>
+                                <div className="input-icon-wrap">
+                                    <Building2 size={16} className="input-icon" />
+                                    <input
+                                        type="text"
+                                        className="form-input form-input--icon"
+                                        placeholder="Mi Empresa S.A."
+                                        value={form.companyName}
+                                        onChange={(e) => set('companyName', e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+                                {loading ? <span className="btn-spinner" /> : t.register_button}
+                            </button>
+                        </form>
+
+                        <p className="auth-footer-text">
+                            {t.has_account}{' '}
+                            <Link to="/login" className="auth-link">{t.login_title}</Link>
+                        </p>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}

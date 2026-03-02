@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     MapPin, User, Tag, Calendar, MoreVertical,
-    Play, Pause, CheckCircle, Trash2, Eye,
+    Play, Pause, CheckCircle, Trash2, X, Hash,
 } from 'lucide-react';
 import { type WorkOrder, type Status, PRIORITY_LABELS, CATEGORY_LABELS, PRIORITY_COLORS } from '../types';
 
@@ -29,13 +29,22 @@ export default function WorkOrderRow({ order, onChangeStatus, onDelete, onView }
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
-        <div className="wo-row">
+        <div
+            className="wo-row wo-row--clickable"
+            onClick={() => { if (!menuOpen) onView(order); }}
+        >
             <div className="wo-row-main">
-                <span className={`priority-badge ${PRIORITY_COLORS[order.prioridad]}`}>
-                    {PRIORITY_LABELS[order.prioridad]}
-                </span>
+                <div className="wo-row-badges">
+                    <span className={`priority-badge ${PRIORITY_COLORS[order.prioridad]}`}>
+                        {PRIORITY_LABELS[order.prioridad]}
+                    </span>
+                    <span className="order-number-badge">
+                        <Hash size={10} />
+                        {String(order.orderNumber).padStart(4, '0')}
+                    </span>
+                </div>
                 <div className="wo-row-info">
-                    <h3 className="wo-row-title" onClick={() => onView(order)}>{order.titulo}</h3>
+                    <h3 className="wo-row-title">{order.titulo}</h3>
                     {order.descripcion && <p className="wo-row-desc">{order.descripcion}</p>}
                 </div>
             </div>
@@ -47,7 +56,7 @@ export default function WorkOrderRow({ order, onChangeStatus, onDelete, onView }
                 <span className="meta-item"><Calendar size={12} />{formatDate(order.creadoEn)}</span>
             </div>
 
-            <div className="wo-row-actions">
+            <div className="wo-row-actions" onClick={(e) => e.stopPropagation()}>
                 <button
                     className="icon-btn"
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -57,6 +66,12 @@ export default function WorkOrderRow({ order, onChangeStatus, onDelete, onView }
                 </button>
                 {menuOpen && (
                     <div className="dropdown-menu dropdown-menu--left">
+                        <div className="dropdown-close-row">
+                            <span className="dropdown-title">Acciones</span>
+                            <button className="dropdown-close-btn" onClick={() => setMenuOpen(false)} title="Cerrar">
+                                <X size={14} />
+                            </button>
+                        </div>
                         <div className="dropdown-section-label">Cambiar estado</div>
                         {STATUS_ACTIONS.filter((a) => a.status !== order.estado).map(({ status, label, icon: Icon }) => (
                             <button
@@ -69,10 +84,6 @@ export default function WorkOrderRow({ order, onChangeStatus, onDelete, onView }
                             </button>
                         ))}
                         <div className="dropdown-divider" />
-                        <button className="dropdown-item" onClick={() => { onView(order); setMenuOpen(false); }}>
-                            <Eye size={14} />
-                            Ver detalle
-                        </button>
                         <button
                             className="dropdown-item dropdown-item--danger"
                             onClick={() => { onDelete(order.id); setMenuOpen(false); }}
