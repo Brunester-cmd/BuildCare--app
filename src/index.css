@@ -1748,12 +1748,14 @@ body,
   font-weight: 800;
   color: var(--slate-800);
   line-height: 1;
+  text-align: center;
 }
 
 .auth-app-sub {
   font-size: 0.72rem;
   color: var(--slate-500);
   margin-top: 2px;
+  text-align: center;
 }
 
 .auth-title {
