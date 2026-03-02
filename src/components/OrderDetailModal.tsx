@@ -29,6 +29,7 @@ const CATEGORIES = Object.keys(CATEGORY_LABELS) as Category[];
 export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, onChangeStatus }: OrderDetailModalProps) {
     const { t, lang } = useI18n();
     const [editing, setEditing] = useState(false);
+    const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
     const [form, setForm] = useState<{
         titulo: string;
         descripcion: string;
@@ -306,7 +307,15 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                         <div className="attachments-gallery">
                                             {order.attachments.map((att, i) => (
                                                 <div key={i} className="attachment-item">
-                                                    <div className="attachment-thumb-container">
+                                                    <div
+                                                        className="attachment-thumb-container"
+                                                        onClick={() => {
+                                                            if (att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                                                                setFullScreenImage(att.url);
+                                                            }
+                                                        }}
+                                                        style={att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? { cursor: 'pointer' } : {}}
+                                                    >
                                                         {att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
                                                             <img
                                                                 src={att.url}
@@ -372,6 +381,21 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                     </div>
                 </div>
             </div>
+
+            {/* Fullscreen Image Overlay */}
+            {fullScreenImage && (
+                <div className="fullscreen-image-overlay" onClick={() => setFullScreenImage(null)}>
+                    <button className="fullscreen-image-close" onClick={() => setFullScreenImage(null)}>
+                        <X size={32} />
+                    </button>
+                    <img
+                        src={fullScreenImage}
+                        alt="Expanded attachment"
+                        className="fullscreen-image"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 }
