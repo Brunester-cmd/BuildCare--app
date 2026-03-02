@@ -115,20 +115,26 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
 
                 <div className="modal-body">
                     <div className="status-chips">
-                        {(['pendiente', 'en-pausa', 'completada'] as Status[]).map((status) => {
-                            const Icon = status === 'pendiente' ? Play : status === 'en-pausa' ? Pause : CheckCircle;
-                            const color = status === 'pendiente' ? 'status-chip--pendiente' : status === 'en-pausa' ? 'status-chip--pausa' : 'status-chip--completada';
-                            return (
-                                <button
-                                    key={status}
-                                    className={`status-chip ${color} ${order.estado === status ? 'status-chip--active' : ''}`}
-                                    onClick={() => onChangeStatus(order.id, status)}
-                                >
-                                    <Icon size={13} />
-                                    {(t as any)[`status_${status.replace('-', '')}`]}
-                                </button>
-                            );
-                        })}
+                        {(['pendiente', 'en-pausa', 'completada'] as Status[])
+                            .filter((status) => {
+                                if (status === order.estado) return false;
+                                if (order.estado === 'en-pausa' && status === 'pendiente') return false;
+                                return true;
+                            })
+                            .map((status) => {
+                                const Icon = status === 'pendiente' ? Play : status === 'en-pausa' ? Pause : CheckCircle;
+                                const color = status === 'pendiente' ? 'status-chip--pendiente' : status === 'en-pausa' ? 'status-chip--pausa' : 'status-chip--completada';
+                                return (
+                                    <button
+                                        key={status}
+                                        className={`status-chip ${color}`}
+                                        onClick={() => onChangeStatus(order.id, status)}
+                                    >
+                                        <Icon size={13} />
+                                        {(t as any)[`status_${status.replace('-', '')}`]}
+                                    </button>
+                                );
+                            })}
                     </div>
 
                     {editing ? (
