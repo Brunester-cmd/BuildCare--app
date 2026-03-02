@@ -109,7 +109,7 @@ export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps)
 
 
     return (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="modal-overlay">
             <div className="modal">
                 <div className="modal-header">
                     <h2 className="modal-title">{t.new_order_title}</h2>
@@ -125,6 +125,8 @@ export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps)
                             placeholder={t.title_placeholder}
                             value={form.titulo}
                             onChange={(e) => set('titulo', e.target.value)}
+                            spellCheck={false}
+                            autoCorrect="off"
                         />
                         {titleError && <span className="form-error">{titleError}</span>}
                     </div>
@@ -136,6 +138,8 @@ export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps)
                             placeholder={t.description_placeholder}
                             value={form.descripcion}
                             onChange={(e) => set('descripcion', e.target.value)}
+                            spellCheck={false}
+                            autoCorrect="off"
                         />
                     </div>
 
@@ -159,6 +163,8 @@ export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps)
                             placeholder={t.location_placeholder}
                             value={form.ubicacion}
                             onChange={(e) => set('ubicacion', e.target.value)}
+                            spellCheck={false}
+                            autoCorrect="off"
                         />
                     </div>
 

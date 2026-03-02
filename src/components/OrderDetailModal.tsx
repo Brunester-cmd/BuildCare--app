@@ -104,7 +104,7 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
     }
 
     return (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !editing && onClose()}>
             <div className="modal modal--wide">
                 <div className="modal-header">
                     <h2 className="modal-title">{t.order_detail}</h2>
@@ -136,12 +136,14 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                             <div className="form-group">
                                 <label className="form-label">{t.title_label}</label>
                                 <input className="form-input" value={form.titulo}
-                                    onChange={(e) => setForm((p) => ({ ...p, titulo: e.target.value }))} />
+                                    onChange={(e) => setForm((p) => ({ ...p, titulo: e.target.value }))}
+                                    spellCheck={false} autoCorrect="off" />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">{t.description_label}</label>
                                 <textarea className="form-input form-textarea" value={form.descripcion}
-                                    onChange={(e) => setForm((p) => ({ ...p, descripcion: e.target.value }))} />
+                                    onChange={(e) => setForm((p) => ({ ...p, descripcion: e.target.value }))}
+                                    spellCheck={false} autoCorrect="off" />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">{t.priority_label}</label>
@@ -153,7 +155,8 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                             <div className="form-group">
                                 <label className="form-label">{t.location_label}</label>
                                 <input className="form-input" value={form.ubicacion}
-                                    onChange={(e) => setForm((p) => ({ ...p, ubicacion: e.target.value }))} />
+                                    onChange={(e) => setForm((p) => ({ ...p, ubicacion: e.target.value }))}
+                                    spellCheck={false} autoCorrect="off" />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">{t.category_label}</label>

@@ -1040,6 +1040,30 @@ body,
   gap: 1rem;
 }
 
+/* Larger fonts inside order modals for better readability */
+.modal .form-input,
+.modal .form-select {
+  font-size: 0.95rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.modal .form-label {
+  font-size: 0.85rem;
+}
+
+.modal .detail-title {
+  font-size: 1.2rem;
+}
+
+.modal .detail-desc {
+  font-size: 0.92rem;
+}
+
+.modal .detail-meta-item {
+  font-size: 0.88rem;
+}
+
+
 .modal-footer {
   display: flex;
   align-items: center;
