@@ -12,9 +12,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import { useDarkMode } from './hooks/useDarkMode';
 import './App.css';
 
 export default function App() {
+  useDarkMode(); // Initialize theme on load
+
   return (
     <BrowserRouter>
       <AuthProvider>

@@ -38,6 +38,24 @@
   --transition: 0.18s ease;
 }
 
+/* ── Dark Mode Overrides ────────────────────────────────────── */
+html.dark {
+  --slate-50: #0f172a;
+  --slate-100: #1e293b;
+  --slate-200: #334155;
+  --slate-300: #475569;
+  --slate-400: #64748b;
+  --slate-500: #94a3b8;
+  --slate-600: #cbd5e1;
+  --slate-700: #f1f5f9;
+  --slate-800: #f8fafc;
+  --slate-900: #ffffff;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
 html,
 body,
 #root {

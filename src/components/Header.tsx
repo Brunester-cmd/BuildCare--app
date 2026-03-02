@@ -9,6 +9,8 @@ import { supabase } from '../lib/supabase';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useI18n } from '../hooks/useI18n';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { Moon } from 'lucide-react';
 
 interface HeaderProps {
     searchQuery: string;
@@ -24,6 +26,7 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
     const { pushEnabled, loading: pushLoading, toggle: togglePush } = usePushNotifications(session?.user.id);
     const { canInstall, promptInstall } = useInstallPrompt();
     const { t } = useI18n();
+    const { isDark, toggleDark } = useDarkMode();
 
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -187,6 +190,16 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                                             <Bell size={14} />
                                             {t.push_notifications}
                                             <span className={`toggle-pill ${pushEnabled ? 'toggle-pill--active' : ''}`} />
+                                        </button>
+
+                                        {/* Modo nocturno */}
+                                        <button
+                                            className="dropdown-item dropdown-item--sub"
+                                            onClick={toggleDark}
+                                        >
+                                            <Moon size={14} />
+                                            {(t as any).dark_mode || 'Modo oscuro'}
+                                            <span className={`toggle-pill ${isDark ? 'toggle-pill--active' : ''}`} />
                                         </button>
 
                                         {/* Idioma */}
