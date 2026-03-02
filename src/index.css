@@ -688,6 +688,28 @@ body,
   font-size: 0.95rem;
 }
 
+/* ── Dashboard Layout ───────────────────────────────────────── */
+.dashboard-controls-row {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  /* View toggle | Filters | New Order */
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-self: flex-start;
+}
+
+.new-order-btn {
+  justify-self: flex-end;
+}
+
 /* ── Work Order Grid ───────────────────────────────────────── */
 .orders-grid {
   display: grid;
@@ -1483,15 +1505,6 @@ body,
   transform: translateY(-1px);
 }
 
-.filter-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-  position: relative;
-  width: 100%;
-}
 
 .filter-menu-toggle.active {
   background: var(--amber-500);
@@ -1502,8 +1515,8 @@ body,
 .filter-dropdown-menu {
   position: absolute;
   top: calc(100% + 0.5rem);
-  right: 0;
-  left: auto;
+  left: 120px;
+  /* Align near the filter button */
   width: 280px;
   background: var(--slate-800);
   border: 1px solid var(--slate-700);
@@ -1677,9 +1690,18 @@ body,
     grid-template-columns: 1fr;
   }
 
-  .filter-container {
-    flex-direction: column;
-    align-items: stretch;
+  .dashboard-controls-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .filter-wrapper {
+    flex-wrap: wrap;
+  }
+
+  .new-order-btn {
+    justify-self: stretch;
+    width: 100%;
   }
 
   .filter-dropdown-menu {

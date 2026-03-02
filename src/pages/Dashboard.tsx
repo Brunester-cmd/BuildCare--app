@@ -122,31 +122,7 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
 
     return (
         <main className="main-content">
-            {/* Action bar */}
-            <div className="action-bar">
-                <div className="view-toggle">
-                    <button
-                        className={`view-btn ${view === 'grid' ? 'view-btn--active' : ''}`}
-                        onClick={() => setView('grid')}
-                        title="Vista grilla"
-                    >
-                        <LayoutGrid size={18} />
-                    </button>
-                    <button
-                        className={`view-btn ${view === 'list' ? 'view-btn--active' : ''}`}
-                        onClick={() => setView('list')}
-                        title="Vista lista"
-                    >
-                        <List size={18} />
-                    </button>
-                </div>
-                <button className="btn btn-primary btn-glow" onClick={() => setShowNewModal(true)}>
-                    <Plus size={18} />
-                    {t.new_order}
-                </button>
-            </div>
-
-            {/* Status cards */}
+            {/* Status cards (Row 1) */}
             <div className="status-cards">
                 <StatusCard
                     label={t.pendientes}
@@ -174,23 +150,47 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                 />
             </div>
 
-            {/* Filter Menu Toggle */}
-            <div className="filter-container">
-                <button
-                    className={`filter-menu-toggle ${isMenuOpen || isFiltered ? 'active' : ''}`}
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                >
-                    <Filter size={18} />
-                    <span>{t.filters_title}</span>
-                    <ChevronDown size={14} style={{ transform: isMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                </button>
-
-                {isFiltered && (
-                    <button className="clear-filters-btn" onClick={clearAllFilters} style={{ margin: 0, height: '38px' }}>
-                        <X size={16} />
-                        {t.clear_filters}
+            {/* Controls Row (Row 2): View Toggle — Filters — New Order */}
+            <div className="dashboard-controls-row">
+                <div className="view-toggle">
+                    <button
+                        className={`view-btn ${view === 'grid' ? 'view-btn--active' : ''}`}
+                        onClick={() => setView('grid')}
+                        title="Vista grilla"
+                    >
+                        <LayoutGrid size={18} />
                     </button>
-                )}
+                    <button
+                        className={`view-btn ${view === 'list' ? 'view-btn--active' : ''}`}
+                        onClick={() => setView('list')}
+                        title="Vista lista"
+                    >
+                        <List size={18} />
+                    </button>
+                </div>
+
+                <div className="filter-wrapper">
+                    <button
+                        className={`filter-menu-toggle ${isMenuOpen || isFiltered ? 'active' : ''}`}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    >
+                        <Filter size={18} />
+                        <span>{t.filters_title}</span>
+                        <ChevronDown size={14} style={{ transform: isMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </button>
+
+                    {isFiltered && (
+                        <button className="clear-filters-btn" onClick={clearAllFilters} style={{ margin: 0, height: '38px' }}>
+                            <X size={16} />
+                            {t.clear_filters}
+                        </button>
+                    )}
+                </div>
+
+                <button className="btn btn-primary btn-glow new-order-btn" onClick={() => setShowNewModal(true)}>
+                    <Plus size={18} />
+                    {t.new_order}
+                </button>
 
                 {isMenuOpen && (
                     <div className="filter-dropdown-menu">
