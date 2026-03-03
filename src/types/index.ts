@@ -54,6 +54,7 @@ export interface WorkOrderDB {
   file_url: string | null;
   file_name: string | null;
   attachments: Attachment[] | null;
+  fecha_programada: string | null;
   deleted: boolean;
   deleted_at: string | null;
   created_at: string;
@@ -77,6 +78,7 @@ export interface WorkOrder {
   asignadoA: string;
   estado: Status | 'eliminada';
   attachments: Attachment[];
+  fechaProgramada?: string;
   eliminadoEn?: string;
   creadoEn: string;
   actualizadoEn: string;

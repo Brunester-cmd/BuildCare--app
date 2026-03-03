@@ -289,6 +289,11 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                 )}
                                 <div className="detail-meta-item">
                                     <Calendar size={14} />
+                                    <span className="detail-meta-label">Fecha Prog.</span>
+                                    <span>{order.fechaProgramada ? fmt(order.fechaProgramada, lang) : '-'}</span>
+                                </div>
+                                <div className="detail-meta-item">
+                                    <Calendar size={14} />
                                     <span className="detail-meta-label">{t.created_at}</span>
                                     <span>{fmt(order.creadoEn, lang)}</span>
                                 </div>

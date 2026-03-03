@@ -12,6 +12,7 @@ export interface NewOrderData {
     ubicacion: string;
     categoria: Category;
     asignadoA: string;
+    fechaProgramada?: string;
     files?: FileList | File[];
 }
 
@@ -28,6 +29,7 @@ function dbToLocal(row: Record<string, unknown>): WorkOrder {
         asignadoA: (row.asignado_a as string) ?? '',
         estado: row.deleted ? 'eliminada' : row.estado as Status,
         attachments: (row.attachments as any[])?.filter(a => a && a.url) ?? [],
+        fechaProgramada: row.fecha_programada as string | undefined,
         eliminadoEn: row.deleted_at as string | undefined,
         creadoEn: row.created_at as string,
         actualizadoEn: row.updated_at as string,
@@ -154,6 +156,7 @@ export function useWorkOrders() {
                 prioridad: data.prioridad, ubicacion: data.ubicacion,
                 categoria: data.categoria, asignado_a: data.asignadoA,
                 estado: 'pendiente' as WoStatus,
+                fecha_programada: data.fechaProgramada || null,
                 attachments: attachments,
             })
             .select()
@@ -238,6 +241,7 @@ export function useWorkOrders() {
         if (changes.ubicacion !== undefined) dbChanges.ubicacion = changes.ubicacion;
         if (changes.categoria !== undefined) dbChanges.categoria = changes.categoria;
         if (changes.asignadoA !== undefined) dbChanges.asignado_a = changes.asignadoA;
+        if (changes.fechaProgramada !== undefined) dbChanges.fecha_programada = changes.fechaProgramada;
         if (changes.estado !== undefined) dbChanges.estado = changes.estado;
         dbChanges.attachments = finalAttachments;
 

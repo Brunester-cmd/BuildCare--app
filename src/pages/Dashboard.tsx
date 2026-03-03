@@ -1,26 +1,29 @@
 import { useState } from 'react';
-import { ClipboardList, PauseCircle, CheckCircle2, Plus, LayoutGrid, List, Inbox, SearchX, X, Filter, ChevronDown } from 'lucide-react';
+import { ClipboardList, PauseCircle, CheckCircle2, Plus, LayoutGrid, List, Inbox, SearchX, X, Filter, ChevronDown, CalendarDays } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkOrders } from '../hooks/useWorkOrders';
-import { type WorkOrder, type Status, type Profile } from '../types';
+import { type WorkOrder, type Status, type Profile, type Priority } from '../types';
 import StatusCard from '../components/StatusCard';
 import WorkOrderCard from '../components/WorkOrderCard';
 import WorkOrderRow from '../components/WorkOrderRow';
 import NewOrderModal from '../components/NewOrderModal';
 import OrderDetailModal from '../components/OrderDetailModal';
 import HistoryPanel from '../components/HistoryPanel';
+import CalendarView from '../components/CalendarView';
 import { useI18n } from '../hooks/useI18n';
+import { useLocation } from 'react-router-dom';
 
-type ActiveFilter = 'pendiente' | 'en-pausa' | 'completada';
+
+type ActiveFilter = 'pendiente' | 'en-pausa' | 'completada' | 'todas';
 
 interface DashboardProps {
-    searchQuery: string;
-    showHistory: boolean;
-    onCloseHistory: () => void;
+    // searchQuery: string; // Now managed internally
+    // showHistory: boolean; // Now managed internally
+    // onCloseHistory: () => void; // Now managed internally
 }
 
-export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: DashboardProps) {
+export default function Dashboard({ /* searchQuery, showHistory, onCloseHistory */ }: DashboardProps) {
     const {
         loading,
         allOrders,
@@ -31,18 +34,21 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
     const { profile, tenant } = useAuth();
     const { t } = useI18n();
     const [filter, setFilter] = useState<ActiveFilter>('pendiente');
-    const [view, setView] = useState<'grid' | 'list'>('grid');
+    const [view, setView] = useState<'grid' | 'list' | 'calendar'>('grid');
     const [showNewModal, setShowNewModal] = useState(false);
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Advanced Filters & Sort State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-    const [priorityFilter, setPriorityFilter] = useState('');
+    const [priorityFilter, setPriorityFilter] = useState<Priority | ''>('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const [assigneeFilter, setAssigneeFilter] = useState('');
-    const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+    const [activeSubmenu, setActiveSubmenu] = useState<'sort' | 'priority' | 'category' | 'assignee' | null>(null);
     const [members, setMembers] = useState<Profile[]>([]);
+    const [scheduleDate, setScheduleDate] = useState<Date | undefined>(undefined);
+    const location = useLocation();
 
     useState(() => {
         async function fetchMembers() {
@@ -61,7 +67,8 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
 
     const baseOrders: WorkOrder[] =
         filter === 'pendiente' ? pendientes :
-            filter === 'en-pausa' ? enPausa : completadas;
+            filter === 'en-pausa' ? enPausa :
+                filter === 'completada' ? completadas : allOrders;
 
     const q = searchQuery.trim().toLowerCase();
     const filteredOrders = baseOrders.filter((o) => {
@@ -107,6 +114,7 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
         pendiente: t.no_pending,
         'en-pausa': t.no_paused,
         completada: t.no_completed,
+        todas: t.no_pending_requests || 'No hay órdenes',
     };
 
     async function handleChangeStatus(id: string, status: Status) {
@@ -114,6 +122,10 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
     }
 
     const selectedOrder = allOrders.find(o => o.id === selectedOrderId);
+
+    // History panel visibility (now internal)
+    const [showHistory, setShowHistory] = useState(false);
+    const onCloseHistory = () => setShowHistory(false);
 
     if (loading) return (
         <main className="main-content">
@@ -171,9 +183,16 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     >
                         <List size={18} />
                     </button>
+                    <button
+                        className={`view-btn ${view === 'calendar' ? 'view-btn--active' : ''}`}
+                        onClick={() => setView('calendar')}
+                        title="Calendario"
+                    >
+                        <CalendarDays size={18} />
+                    </button>
                 </div>
 
-                <button className="btn btn-primary btn-glow new-order-btn" onClick={() => setShowNewModal(true)}>
+                <button className="btn btn-primary btn-glow new-order-btn" onClick={() => { setScheduleDate(undefined); setShowNewModal(true); }}>
                     <Plus size={18} />
                     {t.new_order}
                 </button>
@@ -249,7 +268,7 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                                             <button
                                                 key={p}
                                                 className={`filter-option ${priorityFilter === p ? 'active' : ''}`}
-                                                onClick={() => setPriorityFilter(p)}
+                                                onClick={() => setPriorityFilter(p as Priority)}
                                             >
                                                 {(t as any)[`priority_${p}`]}
                                             </button>
@@ -345,40 +364,48 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
             )}
 
             {/* Orders */}
-            {filteredOrders.length === 0 ? (
+            {view === 'calendar' ? (
+                <CalendarView
+                    orders={filteredOrders}
+                    onOrderClick={(id) => setSelectedOrderId(id)}
+                    onDateClick={(date) => {
+                        setScheduleDate(date);
+                        setShowNewModal(true);
+                    }}
+                />
+            ) : filteredOrders.length === 0 ? (
                 <div className="empty-state">
                     {q ? <SearchX size={48} strokeWidth={1.2} /> : <Inbox size={48} strokeWidth={1.2} />}
                     <p>{q ? (t.no_results_for?.replace('{query}', searchQuery) || `Sin resultados para "${searchQuery}"`) : emptyMessages[filter]}</p>
                 </div>
-            ) : view === 'grid' ? (
-                <div className="orders-grid">
-                    {filteredOrders.map((order) => (
-                        <WorkOrderCard
-                            key={order.id}
-                            order={order}
-                            onChangeStatus={handleChangeStatus}
-                            onDelete={deleteOrder}
-                            onView={(order) => setSelectedOrderId(order.id)}
-                        />
-                    ))}
-                </div>
             ) : (
-                <div className="orders-list">
+                <div className={`work-orders-container ${view === 'grid' ? 'view-grid' : 'view-list'}`}>
                     {filteredOrders.map((order) => (
-                        <WorkOrderRow
-                            key={order.id}
-                            order={order}
-                            onChangeStatus={handleChangeStatus}
-                            onDelete={deleteOrder}
-                            onView={(order) => setSelectedOrderId(order.id)}
-                        />
+                        view === 'grid' ? (
+                            <WorkOrderCard
+                                key={order.id}
+                                order={order}
+                                onChangeStatus={handleChangeStatus}
+                                onDelete={deleteOrder}
+                                onView={(order) => setSelectedOrderId(order.id)}
+                            />
+                        ) : (
+                            <WorkOrderRow
+                                key={order.id}
+                                order={order}
+                                onChangeStatus={handleChangeStatus}
+                                onDelete={deleteOrder}
+                                onView={(o) => setSelectedOrderId(o.id)}
+                            />
+                        )
                     ))}
                 </div>
             )}
 
             {showNewModal && (
                 <NewOrderModal
-                    onClose={() => setShowNewModal(false)}
+                    initialDate={scheduleDate}
+                    onClose={() => { setShowNewModal(false); setScheduleDate(undefined); }}
                     onCreate={createOrder}
                 />
             )}

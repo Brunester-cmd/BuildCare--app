@@ -9,12 +9,13 @@ import { useAuth } from '../contexts/AuthContext';
 interface NewOrderModalProps {
     onClose: () => void;
     onCreate: (data: NewOrderData) => Promise<unknown>;
+    initialDate?: Date;
 }
 
 const PRIORITIES: Priority[] = ['baja', 'media', 'alta', 'urgente'];
 const CATEGORIES = Object.keys(CATEGORY_LABELS) as Category[];
 
-export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps) {
+export default function NewOrderModal({ onClose, onCreate, initialDate }: NewOrderModalProps) {
     const { t } = useI18n();
     const { profile, tenant, refreshProfile } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +31,7 @@ export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps)
         ubicacion: '',
         categoria: 'otro',
         asignadoA: '',
+        fechaProgramada: initialDate ? initialDate.toISOString().split('T')[0] : '',
         files: [],
     });
     const [titleError, setTitleError] = useState('');
@@ -112,7 +114,7 @@ export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps)
         <div className="modal-overlay">
             <div className="modal">
                 <div className="modal-header">
-                    <h2 className="modal-title">{t.new_order_title}</h2>
+                    <h2 className="modal-title">{initialDate ? 'Agendar Orden' : t.new_order_title}</h2>
                     <button className="modal-close" onClick={onClose}><X size={18} /></button>
                 </div>
 
@@ -129,6 +131,16 @@ export default function NewOrderModal({ onClose, onCreate }: NewOrderModalProps)
                             autoCorrect="off"
                         />
                         {titleError && <span className="form-error">{titleError}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Fecha Programada (Opcional)</label>
+                        <input
+                            type="date"
+                            className="form-input"
+                            value={form.fechaProgramada || ''}
+                            onChange={(e) => set('fechaProgramada', e.target.value)}
+                        />
                     </div>
 
                     <div className="form-group">
