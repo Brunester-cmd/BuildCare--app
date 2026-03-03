@@ -13,7 +13,7 @@ interface PendingUser extends Profile { email?: string }
 export default function AdminPanel() {
     const navigate = useNavigate();
     const { t, lang } = useI18n();
-    const [tab, setTab] = useState<'tenants' | 'pending' | 'users'>('pending');
+    const [tab, setTab] = useState<'tenants' | 'pending' | 'users'>('tenants');
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
     const [allUsers, setAllUsers] = useState<PendingUser[]>([]);
@@ -22,12 +22,20 @@ export default function AdminPanel() {
     const [newTenantName, setNewTenantName] = useState('');
     const [addingTenant, setAddingTenant] = useState(false);
     const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set());
+    const [addingUser, setAddingUser] = useState(false);
+    const [newUserForm, setNewUserForm] = useState({
+        fullName: '',
+        email: '',
+        password: '',
+        tenant_id: '',
+        role: 'user' as 'user' | 'admin' | 'super_admin'
+    });
 
     const load = useCallback(async () => {
         setLoading(true);
         const [{ data: t_data }, { data: p_data }] = await Promise.all([
             supabase.from('tenants').select('*').order('created_at', { ascending: false }),
-            supabase.from('profiles').select('*').neq('role', 'super_admin').order('created_at', { ascending: false }),
+            supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         ]);
 
         setTenants((t_data ?? []) as Tenant[]);
@@ -150,6 +158,56 @@ export default function AdminPanel() {
         }
     }
 
+    async function createUser() {
+        if (!newUserForm.email || !newUserForm.password || !newUserForm.fullName) {
+            alert('Completa los campos obligatorios: Nombre, Email y Contraseña');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: newUserForm.email,
+                password: newUserForm.password,
+                options: {
+                    data: {
+                        full_name: newUserForm.fullName,
+                        role: newUserForm.role,
+                        status: 'active'
+                    }
+                }
+            });
+
+            if (error) throw error;
+
+            if (data?.user) {
+                const newProfile = {
+                    id: data.user.id,
+                    email: newUserForm.email,
+                    full_name: newUserForm.fullName,
+                    role: newUserForm.role,
+                    status: 'active',
+                    tenant_id: newUserForm.tenant_id || null,
+                    company_name: tenants.find(t => t.id === newUserForm.tenant_id)?.name || ''
+                };
+
+                const { error: upsertErr } = await supabase.from('profiles').upsert(newProfile);
+                if (upsertErr) console.warn("Upsert failed, trigger might have handled it:", upsertErr);
+
+                alert(`¡Usuario ${newUserForm.fullName} creado!\n\nSe enviará un correo a ${newUserForm.email} para que pueda acceder (si tienes "Confirm email" activado en tu panel de Supabase).`);
+            }
+
+            setAddingUser(false);
+            setNewUserForm({ fullName: '', email: '', password: '', tenant_id: '', role: 'user' });
+            await load();
+        } catch (err: any) {
+            console.error('Error creando usuario:', err);
+            alert(`Error al crear usuario: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     function toggleTenantExpansion(id: string) {
         setExpandedTenants(prev => {
             const next = new Set(prev);
@@ -195,16 +253,6 @@ export default function AdminPanel() {
             {/* Tabs */}
             <div className="admin-tabs">
                 <button
-                    className={`admin-tab ${tab === 'pending' ? 'admin-tab--active' : ''}`}
-                    onClick={() => setTab('pending')}
-                >
-                    <Clock size={15} />
-                    {t.requests_tab}
-                    {pendingUsers.length > 0 && (
-                        <span className="admin-tab-badge">{pendingUsers.length}</span>
-                    )}
-                </button>
-                <button
                     className={`admin-tab ${tab === 'tenants' ? 'admin-tab--active' : ''}`}
                     onClick={() => setTab('tenants')}
                 >
@@ -217,6 +265,16 @@ export default function AdminPanel() {
                 >
                     <Users size={15} />
                     {t.users_tab}
+                </button>
+                <button
+                    className={`admin-tab ${tab === 'pending' ? 'admin-tab--active' : ''}`}
+                    onClick={() => setTab('pending')}
+                >
+                    <Clock size={15} />
+                    {t.requests_tab}
+                    {pendingUsers.length > 0 && (
+                        <span className="admin-tab-badge">{pendingUsers.length}</span>
+                    )}
                 </button>
             </div>
 
@@ -355,16 +413,74 @@ export default function AdminPanel() {
                 <div className="admin-section">
                     <div className="admin-section-bar">
                         <h2 className="admin-section-title">{t.users_tab}</h2>
-                        <div className="search-box" style={{ width: 'auto' }}>
-                            <Search size={14} className="search-icon" />
-                            <input
-                                className="search-input"
-                                placeholder={t.search_users_placeholder}
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <div className="search-box" style={{ width: 'auto', marginBottom: 0 }}>
+                                <Search size={14} className="search-icon" />
+                                <input
+                                    className="search-input"
+                                    placeholder={t.search_users_placeholder}
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => setAddingUser(!addingUser)}
+                            >
+                                <Plus size={14} /> Nuevo Usuario
+                            </button>
                         </div>
                     </div>
+
+                    {addingUser && (
+                        <div className="admin-add-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                            <input
+                                className="form-input"
+                                placeholder="Nombre completo"
+                                value={newUserForm.fullName}
+                                onChange={(e) => setNewUserForm({ ...newUserForm, fullName: e.target.value })}
+                            />
+                            <input
+                                className="form-input"
+                                placeholder="Email"
+                                type="email"
+                                value={newUserForm.email}
+                                onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                            />
+                            <input
+                                className="form-input"
+                                placeholder="Contraseña (Mín. 6)"
+                                type="password"
+                                value={newUserForm.password}
+                                onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
+                            />
+                            <select
+                                className="form-input"
+                                value={newUserForm.tenant_id}
+                                onChange={(e) => setNewUserForm({ ...newUserForm, tenant_id: e.target.value })}
+                            >
+                                <option value="">Sin Empresa (Pendiente)</option>
+                                {tenants.map(tOption => (
+                                    <option key={tOption.id} value={tOption.id}>{tOption.name}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="form-input"
+                                value={newUserForm.role}
+                                onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value as any })}
+                            >
+                                <option value="user">Usuario normal</option>
+                                <option value="admin">Administrador de Empresa</option>
+                                <option value="super_admin">Super Admin (Sistema)</option>
+                            </select>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <button className="btn btn-primary btn-sm" onClick={createUser} disabled={loading}>
+                                    {loading ? 'Creando...' : 'Crear Usuario'}
+                                </button>
+                                <button className="btn btn-ghost btn-sm" onClick={() => setAddingUser(false)}>Cancelar</button>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="admin-list">
                         {filteredUsers.map((u) => (

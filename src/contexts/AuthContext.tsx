@@ -24,8 +24,30 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    // Hardcoded global state that mimics an active super_admin user
-    const [theme, setThemeState] = useState<Theme>('light');
+    const [session, setSession] = useState<Session | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [profile, setProfile] = useState<Profile | null>(null);
+    const [tenant, setTenant] = useState<Tenant | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const [theme, setThemeState] = useState<Theme>(() => {
+        try {
+            const tokenStr = localStorage.getItem('sb-sihaesufrnipdnfuuuet-auth-token');
+            if (tokenStr) {
+                const token = JSON.parse(tokenStr);
+                const uid = token?.user?.id;
+                if (uid) {
+                    const saved = localStorage.getItem(`theme_${uid}`) as Theme;
+                    if (saved && ['light', 'dark', 'earth', 'cherry', 'azurite', 'oceanic', 'mineral', 'autumn', 'industrial'].includes(saved)) {
+                        return saved;
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore parse errors
+        }
+        return 'light'; // Default theme for login screen
+    });
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -37,57 +59,156 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [theme]);
 
-    const mockSession = {
-        access_token: 'dummy_token',
-        refresh_token: 'dummy_refresh',
-        expires_in: 3600,
-        expires_at: 9999999999,
-        token_type: 'bearer',
-        user: { id: 'public-user-123', email: 'public@buildcare.app' } as any
-    };
+    const fetchProfile = useCallback(async (uid: string) => {
+        const { data: prof } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', uid)
+            .single();
 
-    const mockProfile = {
-        id: 'public-user-123',
-        tenant_id: '00000000-0000-0000-0000-000000000000',
-        full_name: 'BuildCare Master',
-        role: 'super_admin',
-        status: 'active',
-        theme: theme
-    } as any;
+        if (prof) {
+            setProfile(prof as Profile);
+            if (prof.theme && ['light', 'dark', 'earth', 'cherry', 'azurite', 'oceanic', 'mineral', 'autumn', 'industrial'].includes(prof.theme)) {
+                setThemeState(prof.theme as Theme);
+                localStorage.setItem(`theme_${uid}`, prof.theme);
+            } else {
+                setThemeState('light');
+            }
 
-    const mockTenant = {
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'BuildCare Público',
-        slug: 'buildcare-publico',
-        active: true
-    } as any;
+            if (prof.tenant_id) {
+                const { data: ten } = await supabase
+                    .from('tenants')
+                    .select('*')
+                    .eq('id', prof.tenant_id)
+                    .single();
+                if (ten) setTenant(ten as Tenant);
+                else setTenant(null);
+            } else {
+                setTenant(null);
+            }
+        }
+    }, []);
 
-    async function signIn() { return { error: null }; }
-    async function signOut() { }
-    async function refreshProfile() { }
-    async function updateLanguage() { }
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session: s } }) => {
+            setSession(s);
+            setUser(s?.user ?? null);
+            if (s?.user) fetchProfile(s.user.id).finally(() => setLoading(false));
+            else setLoading(false);
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_ev, s) => {
+            setSession(s);
+            setUser(s?.user ?? null);
+            if (s?.user) fetchProfile(s.user.id);
+            else { setProfile(null); setTenant(null); }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [fetchProfile]);
+
+    // Realtime profile subscription
+    useEffect(() => {
+        if (!user) return;
+
+        const channel = supabase
+            .channel(`profile_changes:${user.id}`)
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'profiles',
+                filter: `id=eq.${user.id}`
+            }, () => {
+                void fetchProfile(user.id);
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user, fetchProfile]);
+
+    async function signIn(email: string, password: string) {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return { error: error.message };
+
+        if (data?.user) {
+            const { data: prof } = await supabase
+                .from('profiles')
+                .select('status, tenant_id, role, theme')
+                .eq('id', data.user.id)
+                .single();
+
+            if (!prof) {
+                await supabase.auth.signOut();
+                return { error: 'Tu cuenta ha sido eliminada. Debés solicitar acceso nuevamente.' };
+            }
+
+            if (prof.status === 'suspended') {
+                await supabase.auth.signOut();
+                return { error: 'Tu cuenta ha sido suspendida. Contactá al administrador.' };
+            }
+
+            if (prof.tenant_id && prof.role !== 'super_admin') {
+                const { data: ten } = await supabase
+                    .from('tenants')
+                    .select('active')
+                    .eq('id', prof.tenant_id)
+                    .single();
+
+                if (!ten || !ten.active) {
+                    await supabase.auth.signOut();
+                    return { error: 'La empresa a la que perteneces ha sido desactivada o eliminada.' };
+                }
+            }
+
+            if (prof.theme && ['light', 'dark', 'earth', 'cherry', 'azurite', 'oceanic', 'mineral', 'autumn', 'industrial'].includes(prof.theme)) {
+                setThemeState(prof.theme as Theme);
+                localStorage.setItem(`theme_${data.user.id}`, prof.theme);
+            } else {
+                setThemeState('light');
+            }
+        }
+
+        return { error: null };
+    }
+
+    async function signOut() {
+        await supabase.auth.signOut();
+        setProfile(null);
+        setTenant(null);
+        setThemeState('light'); // Reset to default on sign out
+    }
+
+    async function refreshProfile() {
+        if (user) await fetchProfile(user.id);
+    }
+
+    async function updateLanguage(lang: string) {
+        if (!user) return;
+        setProfile(prev => prev ? { ...prev, language: lang } : null);
+        await supabase.from('profiles').update({ language: lang }).eq('id', user.id);
+    }
 
     async function setTheme(newTheme: Theme) {
         setThemeState(newTheme);
+        if (user) {
+            localStorage.setItem(`theme_${user.id}`, newTheme);
+            await supabase.from('profiles').update({ theme: newTheme }).eq('id', user.id);
+        }
     }
+
+    const isSuperAdmin = profile?.role === 'super_admin';
+    const isAdmin = profile?.role === 'admin' || isSuperAdmin;
+    const isActive = profile?.status === 'active';
 
     return (
         <AuthContext.Provider value={{
-            session: mockSession,
-            user: mockSession.user,
-            profile: mockProfile,
-            tenant: mockTenant,
-            loading: false, // Never loading
-            isSuperAdmin: true,
-            isAdmin: true,
-            isActive: true,
-            theme,
-            setTheme,
-            signIn,
-            signOut,
-            refreshProfile,
-            updateLanguage,
+            session, user, profile, tenant, loading,
+            isSuperAdmin, isAdmin, isActive, theme, setTheme,
+            signIn, signOut, refreshProfile, updateLanguage,
         }}>
+
             {children}
         </AuthContext.Provider>
     );
