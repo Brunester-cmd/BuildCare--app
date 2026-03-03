@@ -7,9 +7,10 @@ interface CalendarViewProps {
     orders: WorkOrder[];
     onOrderClick?: (orderId: string) => void;
     onViewDay?: (date: Date) => void;
+    onNewOrder?: (date: Date) => void;
 }
 
-export default function CalendarView({ orders, onOrderClick, onViewDay }: CalendarViewProps) {
+export default function CalendarView({ orders, onOrderClick, onViewDay, onNewOrder }: CalendarViewProps) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState<{ date: Date; orders: WorkOrder[] } | null>(null);
 
@@ -176,6 +177,10 @@ export default function CalendarView({ orders, onOrderClick, onViewDay }: Calend
                     onOrderClick={(orderId) => {
                         setSelectedDay(null);
                         onOrderClick?.(orderId);
+                    }}
+                    onNewOrder={(date) => {
+                        setSelectedDay(null);
+                        onNewOrder?.(date);
                     }}
                 />
             )}

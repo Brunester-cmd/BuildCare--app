@@ -1,4 +1,4 @@
-import { X, ExternalLink, ClipboardList } from 'lucide-react';
+import { X, ExternalLink, ClipboardList, Plus } from 'lucide-react';
 import type { WorkOrder } from '../types';
 import { PRIORITY_LABELS, CATEGORY_LABELS } from '../types';
 
@@ -8,6 +8,7 @@ interface DayOrdersModalProps {
     onClose: () => void;
     onViewDay: (date: Date) => void;
     onOrderClick: (orderId: string) => void;
+    onNewOrder: (date: Date) => void;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -29,7 +30,7 @@ const PRIORITY_DOT: Record<string, string> = {
     urgente: 'dot--urgente',
 };
 
-export default function DayOrdersModal({ date, orders, onClose, onViewDay, onOrderClick }: DayOrdersModalProps) {
+export default function DayOrdersModal({ date, orders, onClose, onViewDay, onOrderClick, onNewOrder }: DayOrdersModalProps) {
     const dateLabel = date.toLocaleDateString('es-AR', {
         weekday: 'long',
         year: 'numeric',
@@ -106,7 +107,14 @@ export default function DayOrdersModal({ date, orders, onClose, onViewDay, onOrd
                         Cerrar
                     </button>
                     <button
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-primary btn-sm btn-glow"
+                        onClick={() => { onNewOrder(date); onClose(); }}
+                    >
+                        <Plus size={14} />
+                        Nueva Orden
+                    </button>
+                    <button
+                        className="btn btn-secondary btn-sm"
                         onClick={() => { onViewDay(date); onClose(); }}
                     >
                         <ExternalLink size={14} />

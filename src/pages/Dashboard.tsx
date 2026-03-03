@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, PauseCircle, CheckCircle2, Plus, LayoutGrid, List, Inbox, SearchX, X, Filter, ChevronDown, CalendarDays } from 'lucide-react';
+import { ClipboardList, PauseCircle, CheckCircle2, Plus, List, Inbox, SearchX, X, Filter, ChevronDown, CalendarDays } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkOrders } from '../hooks/useWorkOrders';
 import { type WorkOrder, type Status, type Profile, type Priority } from '../types';
 import StatusCard from '../components/StatusCard';
 import WorkOrderCard from '../components/WorkOrderCard';
-import WorkOrderRow from '../components/WorkOrderRow';
 import NewOrderModal from '../components/NewOrderModal';
 import OrderDetailModal from '../components/OrderDetailModal';
 import HistoryPanel from '../components/HistoryPanel';
@@ -148,7 +147,10 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     count={pendientes.length}
                     icon={ClipboardList}
                     isActive={filter === 'pendiente'}
-                    onClick={() => setFilter('pendiente')}
+                    onClick={() => {
+                        setFilter('pendiente');
+                        if (view === 'calendar') setView('list');
+                    }}
                     colorClass="status-icon--blue"
                 />
                 <StatusCard
@@ -156,7 +158,10 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     count={enPausa.length}
                     icon={PauseCircle}
                     isActive={filter === 'en-pausa'}
-                    onClick={() => setFilter('en-pausa')}
+                    onClick={() => {
+                        setFilter('en-pausa');
+                        if (view === 'calendar') setView('list');
+                    }}
                     colorClass="status-icon--amber"
                 />
                 <StatusCard
@@ -164,7 +169,10 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     count={completadas.length}
                     icon={CheckCircle2}
                     isActive={filter === 'completada'}
-                    onClick={() => setFilter('completada')}
+                    onClick={() => {
+                        setFilter('completada');
+                        if (view === 'calendar') setView('list');
+                    }}
                     colorClass="status-icon--green"
                 />
             </div>
@@ -172,13 +180,6 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
             {/* Controls Row (Row 2): View Toggle — Filters — New Order */}
             <div className="dashboard-controls-row">
                 <div className="view-toggle">
-                    <button
-                        className={`view-btn ${view === 'grid' ? 'view-btn--active' : ''}`}
-                        onClick={() => setView('grid')}
-                        title="Vista grilla"
-                    >
-                        <LayoutGrid size={18} />
-                    </button>
                     <button
                         className={`view-btn ${view === 'list' ? 'view-btn--active' : ''}`}
                         onClick={() => setView('list')}
@@ -375,6 +376,10 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                         const iso = date.toISOString().split('T')[0];
                         navigate(`/dia?date=${iso}`);
                     }}
+                    onNewOrder={(date) => {
+                        setScheduleDate(date);
+                        setShowNewModal(true);
+                    }}
                 />
             ) : filteredOrders.length === 0 ? (
                 <div className="empty-state">
@@ -382,25 +387,15 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     <p>{q ? (t.no_results_for?.replace('{query}', searchQuery) || `Sin resultados para "${searchQuery}"`) : emptyMessages[filter]}</p>
                 </div>
             ) : (
-                <div className={`work-orders-container ${view === 'grid' ? 'view-grid' : 'view-list'}`}>
+                <div className="orders-list">
                     {filteredOrders.map((order) => (
-                        view === 'grid' ? (
-                            <WorkOrderCard
-                                key={order.id}
-                                order={order}
-                                onChangeStatus={handleChangeStatus}
-                                onDelete={deleteOrder}
-                                onView={(order) => setSelectedOrderId(order.id)}
-                            />
-                        ) : (
-                            <WorkOrderRow
-                                key={order.id}
-                                order={order}
-                                onChangeStatus={handleChangeStatus}
-                                onDelete={deleteOrder}
-                                onView={(o) => setSelectedOrderId(o.id)}
-                            />
-                        )
+                        <WorkOrderCard
+                            key={order.id}
+                            order={order}
+                            onView={(order) => setSelectedOrderId(order.id)}
+                            onChangeStatus={handleChangeStatus}
+                            onDelete={deleteOrder}
+                        />
                     ))}
                 </div>
             )}

@@ -634,7 +634,7 @@ body,
 }
 
 .filter-submenu-toggle:hover {
-  background: var(--slate-50);
+  background: var(--slate-200);
   border-radius: 6px;
 }
 
@@ -1847,7 +1847,7 @@ body,
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   font-size: 0.85rem;
-  color: var(--slate-300);
+  color: var(--slate-800);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -1855,8 +1855,8 @@ body,
 }
 
 .filter-option:hover {
-  background: var(--slate-700);
-  color: white;
+  background: var(--slate-200);
+  color: var(--slate-900);
 }
 
 .filter-option.active {
