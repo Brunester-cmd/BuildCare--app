@@ -70,9 +70,11 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
         const matchesSearch = !q ||
             String(o.orderNumber).padStart(4, '0').includes(cleanQ) ||
             o.titulo.toLowerCase().includes(q) ||
-            o.descripcion.toLowerCase().includes(q) ||
-            o.ubicacion.toLowerCase().includes(q) ||
-            o.asignadoA.toLowerCase().includes(q);
+            (o.descripcion && o.descripcion.toLowerCase().includes(q)) ||
+            (o.ubicacion && o.ubicacion.toLowerCase().includes(q)) ||
+            (o.asignadoA && o.asignadoA.toLowerCase().includes(q)) ||
+            (o.prioridad && o.prioridad.toLowerCase().includes(q)) ||
+            (o.categoria && o.categoria.toLowerCase().includes(q));
 
         // Priority filter
         const matchesPriority = !priorityFilter || o.prioridad === priorityFilter;
