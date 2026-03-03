@@ -3501,15 +3501,17 @@ body,
   right: 4px;
   background: var(--amber-500);
   color: white;
-  font-size: 0.62rem;
+  font-size: 1.24rem;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
   line-height: 1;
 }
 
