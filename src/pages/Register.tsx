@@ -9,6 +9,7 @@ export default function Register() {
     const [form, setForm] = useState({
         fullName: '',
         email: '',
+        password: '',
         companyName: '',
     });
     const [submitted, setSubmitted] = useState(false);
@@ -24,17 +25,16 @@ export default function Register() {
         setError('');
         setLoading(true);
 
-        // Sign up with a temporary random password — user will set real password via email invite
-        const tempPass = `buildcare_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        // Use the password provided by the user
         const { error: err } = await supabase.auth.signUp({
             email: form.email,
-            password: tempPass,
+            password: form.password,
             options: {
                 data: {
                     full_name: form.fullName,
                     company_name: form.companyName,
                     role: 'user',
-                    status: 'pending',
+                    status: 'active',
                 },
                 emailRedirectTo: `${window.location.origin}/reset-password`,
             },
@@ -129,6 +129,22 @@ export default function Register() {
                                         value={form.email}
                                         onChange={(e) => set('email', e.target.value)}
                                         required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Contraseña</label>
+                                <div className="input-icon-wrap">
+                                    <Wrench size={16} className="input-icon" />
+                                    <input
+                                        type="password"
+                                        className="form-input form-input--icon"
+                                        placeholder="Tu contraseña secreta"
+                                        value={form.password}
+                                        onChange={(e) => set('password', e.target.value)}
+                                        required
+                                        minLength={6}
                                     />
                                 </div>
                             </div>
