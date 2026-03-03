@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, PauseCircle, CheckCircle2, Plus, LayoutGrid, List, Inbox, SearchX, X, Filter, ChevronDown, CalendarDays } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -46,6 +46,14 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
     const [categoryFilter, setCategoryFilter] = useState('');
     const [assigneeFilter, setAssigneeFilter] = useState('');
     const [activeSubmenu, setActiveSubmenu] = useState<'sort' | 'priority' | 'category' | 'assignee' | null>(null);
+
+    // Reset sub-menu when the filter menu closes
+    useEffect(() => {
+        if (!isMenuOpen) {
+            setActiveSubmenu(null);
+        }
+    }, [isMenuOpen]);
+
     const [members, setMembers] = useState<Profile[]>([]);
     const [scheduleDate, setScheduleDate] = useState<Date | undefined>(undefined);
 

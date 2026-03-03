@@ -29,6 +29,15 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showThemes, setShowThemes] = useState(false);
+
+    // Reset sub-menus when the main menu closes
+    useEffect(() => {
+        if (!userMenuOpen) {
+            setShowSettings(false);
+            setShowThemes(false);
+        }
+    }, [userMenuOpen]);
+
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [now, setNow] = useState(new Date());
     const menuRef = useRef<HTMLDivElement>(null);
