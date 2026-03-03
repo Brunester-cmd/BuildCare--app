@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { Profile, Tenant } from '../types';
+import type { Theme } from '../hooks/useTheme';
 
 interface AuthContextValue {
     session: Session | null;
@@ -12,6 +13,8 @@ interface AuthContextValue {
     isSuperAdmin: boolean;
     isAdmin: boolean;
     isActive: boolean;
+    theme: Theme;
+    setTheme: (theme: Theme) => Promise<void>;
     signIn: (email: string, password: string) => Promise<{ error: string | null }>;
     signOut: () => Promise<void>;
     refreshProfile: () => Promise<void>;
@@ -27,6 +30,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const [theme, setThemeState] = useState<Theme>(() => {
+        try {
+            const tokenStr = localStorage.getItem('sb-sihaesufrnipdnfuuuet-auth-token');
+            if (tokenStr) {
+                const token = JSON.parse(tokenStr);
+                const uid = token?.user?.id;
+                if (uid) {
+                    const saved = localStorage.getItem(`theme_${uid}`) as Theme;
+                    if (saved && ['light', 'dark', 'earth', 'cherry', 'azurite', 'oceanic', 'mineral', 'autumn', 'industrial'].includes(saved)) {
+                        return saved;
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore parse errors
+        }
+        return 'light'; // Default theme for login screen
+    });
+
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.classList.remove('dark', 'theme-earth', 'theme-cherry', 'theme-azurite', 'theme-oceanic', 'theme-pastel', 'theme-mineral', 'theme-autumn', 'theme-industrial');
+        if (theme === 'dark') {
+            root.classList.add('dark');
+        } else if (theme !== 'light') {
+            root.classList.add(`theme-${theme}`);
+        }
+    }, [theme]);
+
     const fetchProfile = useCallback(async (uid: string) => {
         const { data: prof } = await supabase
             .from('profiles')
@@ -36,6 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (prof) {
             setProfile(prof as Profile);
+            if (prof.theme && ['light', 'dark', 'earth', 'cherry', 'azurite', 'oceanic', 'mineral', 'autumn', 'industrial'].includes(prof.theme)) {
+                setThemeState(prof.theme as Theme);
+                localStorage.setItem(`theme_${uid}`, prof.theme);
+            } else {
+                setThemeState('light');
+            }
+
             if (prof.tenant_id) {
                 const { data: ten } = await supabase
                     .from('tenants')
@@ -96,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (data?.user) {
             const { data: prof } = await supabase
                 .from('profiles')
-                .select('status, tenant_id, role')
+                .select('status, tenant_id, role, theme')
                 .eq('id', data.user.id)
                 .single();
 
@@ -122,6 +161,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     return { error: 'La empresa a la que perteneces ha sido desactivada o eliminada.' };
                 }
             }
+
+            if (prof.theme && ['light', 'dark', 'earth', 'cherry', 'azurite', 'oceanic', 'mineral', 'autumn', 'industrial'].includes(prof.theme)) {
+                setThemeState(prof.theme as Theme);
+                localStorage.setItem(`theme_${data.user.id}`, prof.theme);
+            } else {
+                setThemeState('light');
+            }
         }
 
         return { error: null };
@@ -131,6 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
         setProfile(null);
         setTenant(null);
+        setThemeState('light'); // Reset to default on sign out
     }
 
     async function refreshProfile() {
@@ -143,6 +190,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.from('profiles').update({ language: lang }).eq('id', user.id);
     }
 
+    async function setTheme(newTheme: Theme) {
+        setThemeState(newTheme);
+        if (user) {
+            localStorage.setItem(`theme_${user.id}`, newTheme);
+            await supabase.from('profiles').update({ theme: newTheme }).eq('id', user.id);
+        }
+    }
+
     const isSuperAdmin = profile?.role === 'super_admin';
     const isAdmin = profile?.role === 'admin' || isSuperAdmin;
     const isActive = profile?.status === 'active';
@@ -150,7 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return (
         <AuthContext.Provider value={{
             session, user, profile, tenant, loading,
-            isSuperAdmin, isAdmin, isActive,
+            isSuperAdmin, isAdmin, isActive, theme, setTheme,
             signIn, signOut, refreshProfile, updateLanguage,
         }}>
 

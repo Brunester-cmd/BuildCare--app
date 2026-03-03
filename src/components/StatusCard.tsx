@@ -13,7 +13,7 @@ export default function StatusCard({ label, count, icon: Icon, isActive, onClick
     return (
         <button onClick={onClick} className={`status-card ${isActive ? 'status-card--active' : ''}`}>
             <div className={`status-icon ${colorClass}`}>
-                <Icon size={22} strokeWidth={2} />
+                <Icon size={18} strokeWidth={2} />
             </div>
             <div className="status-info">
                 <span className="status-count">{count}</span>

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-    Wrench, Trash2, Search, Settings, LogOut, ChevronDown, ChevronRight,
+    Trash2, Search, Settings, LogOut, ChevronDown, ChevronRight,
     UserCircle, Bell, Shield, LogIn, Lock, Clock, Camera, Globe, Download,
     Palette, Check
 } from 'lucide-react';
@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useI18n } from '../hooks/useI18n';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
-import { useTheme } from '../hooks/useTheme';
+
 interface HeaderProps {
     searchQuery: string;
     onSearchChange: (q: string) => void;
@@ -21,11 +21,10 @@ interface HeaderProps {
 export default function Header({ searchQuery, onSearchChange, onHistoryToggle, historyOpen }: HeaderProps) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { session, profile, tenant, isSuperAdmin, signOut, refreshProfile, updateLanguage } = useAuth();
+    const { session, profile, tenant, isSuperAdmin, signOut, refreshProfile, updateLanguage, theme, setTheme } = useAuth();
     const { pushEnabled, loading: pushLoading, toggle: togglePush } = usePushNotifications(session?.user.id);
     const { canInstall, promptInstall } = useInstallPrompt();
     const { t } = useI18n();
-    const { theme, setTheme } = useTheme();
 
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -75,19 +74,8 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
 
     return (
         <header className="header">
-            {/* Left — Logo */}
-            <Link to="/" className="header-logo-link">
-                <div className="logo-badge">
-                    <Wrench size={20} strokeWidth={2.5} />
-                </div>
-                <div className="header-brand">
-                    <span className="brand-name">BuildCare</span>
-                    <span className="brand-subtitle">{t.app_subtitle}</span>
-                </div>
-            </Link>
-
-            {/* Center — User dropdown */}
-            <div className="header-center" ref={menuRef}>
+            {/* Left — User dropdown (replaces logo) */}
+            <div className="header-left" ref={menuRef}>
                 {session ? (
                     <>
                         <button
@@ -150,8 +138,6 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                                         <div className="dropdown-divider" />
                                     </>
                                 )}
-
-
 
                                 {/* Configuración section */}
                                 <button
@@ -327,8 +313,6 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                                     </div>
                                 )}
 
-
-
                                 <div className="dropdown-divider" />
 
                                 {canInstall && (
@@ -356,6 +340,8 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                     </Link>
                 )}
             </div>
+
+            {/* Center block has been removed, user menu moved to the left side */}
 
             {/* Right — Search + nav icons (only when logged in) */}
             {session && (

@@ -130,7 +130,7 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     icon={ClipboardList}
                     isActive={filter === 'pendiente'}
                     onClick={() => setFilter('pendiente')}
-                    colorClass="status-icon--amber"
+                    colorClass="status-icon--blue"
                 />
                 <StatusCard
                     label={t.en_pausa}
@@ -138,7 +138,7 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
                     icon={PauseCircle}
                     isActive={filter === 'en-pausa'}
                     onClick={() => setFilter('en-pausa')}
-                    colorClass="status-icon--blue"
+                    colorClass="status-icon--amber"
                 />
                 <StatusCard
                     label={t.completadas}

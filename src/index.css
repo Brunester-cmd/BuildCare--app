@@ -309,10 +309,10 @@ body,
   font-weight: 400;
 }
 
-/* ── Header center (user dropdown) ──── */
-.header-center {
+/* ── Header left (user dropdown) ──── */
+.header-left {
   position: relative;
-  margin-left: 1.5rem;
+  /* margin-left: 1.5rem; Removed since it's now the first item */
 }
 
 .user-menu-btn {
@@ -803,7 +803,7 @@ body,
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.1rem 1.25rem;
+  padding: 0.8rem 1.25rem;
   background: var(--slate-100);
   border: 2px solid var(--slate-200);
   border-radius: var(--radius-lg);
@@ -825,8 +825,8 @@ body,
 }
 
 .status-icon {
-  width: 46px;
-  height: 46px;
+  width: 35px;
+  height: 35px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -855,7 +855,7 @@ body,
 }
 
 .status-count {
-  font-size: 1.8rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--slate-800);
   line-height: 1;
@@ -2030,9 +2030,22 @@ body,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #eef0f5;
   padding: 2rem 1rem;
   gap: 1.5rem;
+
+  /* Force Azurite variables for Login/Register pages unconditionally */
+  --slate-50: #192336;
+  --slate-100: #2a3b5a;
+  --slate-200: #3f5680;
+  --slate-300: #a19593;
+  --slate-400: #baadaa;
+  --slate-500: #c8704c;
+  --slate-600: #d98462;
+  --slate-700: #ded5c1;
+  --slate-800: #ece5d2;
+  --slate-900: #fdf8eb;
+
+  background: var(--slate-50);
 }
 
 .auth-card {
