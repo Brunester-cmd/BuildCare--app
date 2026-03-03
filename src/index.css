@@ -3409,6 +3409,7 @@ body,
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(0, 1fr);
   flex: 1;
   min-height: 500px;
 }
@@ -3420,7 +3421,10 @@ body,
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  min-height: 100px;
+  min-height: 0;
+  /* Changed from 100px to prevent expansion */
+  min-width: 0;
+  overflow: hidden;
   cursor: pointer;
   transition: background 0.15s;
 }

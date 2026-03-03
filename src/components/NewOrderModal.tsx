@@ -195,22 +195,52 @@ export default function NewOrderModal({ onClose, onCreate, initialDate }: NewOrd
 
                     <div className="form-group">
                         <label className="form-label">{t.assigned_to}</label>
-                        <div className="input-icon-wrap">
+                        <div className="input-icon-wrap" style={{ marginBottom: '0.5rem' }}>
                             <User size={16} className="input-icon" />
                             <select
                                 className="form-input form-input--icon form-select"
-                                value={form.asignadoA}
-                                onChange={(e) => set('asignadoA', e.target.value)}
+                                value={""}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (!val) return;
+                                    const current = form.asignadoA ? form.asignadoA.split(', ').filter(Boolean) : [];
+                                    if (!current.includes(val)) {
+                                        set('asignadoA', [...current, val].join(', '));
+                                    }
+                                }}
                                 disabled={membersLoading}
                             >
                                 <option value="">{t.select_assignee || 'Seleccionar operario'}</option>
-                                {members.map((m) => (
-                                    <option key={m.id} value={m.full_name || m.email}>
-                                        {m.full_name || m.email}
-                                    </option>
-                                ))}
+                                {members.map((m) => {
+                                    const name = m.full_name || m.email;
+                                    return (
+                                        <option key={m.id} value={name}>
+                                            {name}
+                                        </option>
+                                    );
+                                })}
                             </select>
                         </div>
+                        {form.asignadoA && (
+                            <div className="edit-attachments-list">
+                                {form.asignadoA.split(', ').filter(Boolean).map((assignee, i) => (
+                                    <div key={i} className="selected-file-badge" style={{ marginBottom: '0.4rem', background: 'var(--slate-100)', color: 'var(--slate-700)', borderColor: 'var(--slate-200)' }}>
+                                        <User size={14} />
+                                        <span className="file-name-text">{assignee}</span>
+                                        <button
+                                            type="button"
+                                            className="file-remove-btn"
+                                            onClick={() => {
+                                                const current = form.asignadoA!.split(', ').filter(Boolean);
+                                                set('asignadoA', current.filter(a => a !== assignee).join(', '));
+                                            }}
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="form-group">
