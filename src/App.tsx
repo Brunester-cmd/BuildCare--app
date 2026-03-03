@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import RecycleBin from './pages/RecycleBin';
 import AdminPanel from './pages/AdminPanel';
+import DayOrdersPage from './pages/DayOrdersPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -54,6 +55,7 @@ function AppContent() {
                 />
               } />
               <Route path="/papelera" element={<RecycleBin />} />
+              <Route path="/dia" element={<DayOrdersPage />} />
               <Route
                 path="/admin"
                 element={isSuperAdmin ? <AdminPanel /> : <Navigate to="/" replace />}

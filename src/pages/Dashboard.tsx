@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClipboardList, PauseCircle, CheckCircle2, Plus, LayoutGrid, List, Inbox, SearchX, X, Filter, ChevronDown, CalendarDays } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -30,6 +31,7 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
         createOrder, updateOrder, changeStatus, deleteOrder,
         loadHistory,
     } = useWorkOrders();
+    const navigate = useNavigate();
     const { profile, tenant } = useAuth();
     const { t } = useI18n();
     const [filter, setFilter] = useState<ActiveFilter>('pendiente');
@@ -359,11 +361,11 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
             {/* Orders */}
             {view === 'calendar' ? (
                 <CalendarView
-                    orders={filteredOrders}
+                    orders={allOrders}
                     onOrderClick={(id) => setSelectedOrderId(id)}
-                    onDateClick={(date) => {
-                        setScheduleDate(date);
-                        setShowNewModal(true);
+                    onViewDay={(date) => {
+                        const iso = date.toISOString().split('T')[0];
+                        navigate(`/dia?date=${iso}`);
                     }}
                 />
             ) : filteredOrders.length === 0 ? (
