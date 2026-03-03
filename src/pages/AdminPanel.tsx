@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Building2, Users, Clock, CheckCircle, XCircle,
-    Trash2, Plus, Search, RefreshCw, Shield, ArrowLeft,
+    Trash2, Plus, Search, RefreshCw, ArrowLeft,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Profile, Tenant } from '../types';
@@ -169,17 +169,25 @@ export default function AdminPanel() {
 
     return (
         <main className="main-content">
-            <div className="admin-header">
-                <div className="admin-title-group">
-                    <button className="btn btn-ghost btn-sm back-btn" onClick={() => navigate('/')} title={t.back_to_dashboard}>
-                        <ArrowLeft size={18} />
-                        <span>{t.back_to_dashboard}</span>
-                    </button>
-                    <div className="title-separator" />
-                    <Shield size={22} className="admin-shield" />
+            <div className="admin-header" style={{ position: 'relative', justifyContent: 'center' }}>
+                <button
+                    className="btn btn-ghost btn-sm back-btn"
+                    style={{ position: 'absolute', left: 0 }}
+                    onClick={() => navigate('/')}
+                    title={t.back_to_dashboard}
+                >
+                    <ArrowLeft size={18} />
+                    <span>{t.back_to_dashboard}</span>
+                </button>
+                <div className="admin-title-group" style={{ justifyContent: 'center' }}>
                     <h1 className="admin-title">{t.admin_panel}</h1>
                 </div>
-                <button className="icon-btn" onClick={() => load()} title={t.refresh}>
+                <button
+                    className="icon-btn"
+                    style={{ position: 'absolute', right: 0 }}
+                    onClick={() => load()}
+                    title={t.refresh}
+                >
                     <RefreshCw size={16} className={loading ? 'spin' : ''} />
                 </button>
             </div>

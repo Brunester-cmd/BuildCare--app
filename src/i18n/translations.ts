@@ -160,7 +160,7 @@ export const translations = {
         saving: 'Guardando…',
         error_creating_order: 'Error al crear la orden. Verificá tu conexión o permisos.',
         error_missing_tenant: 'No tenés una empresa asignada. Por favor, contactá a un administrador.',
-        back_to_dashboard: 'Volver al Dashboard',
+        back_to_dashboard: 'Volver',
         required_title: 'El título es requerido',
 
         status_pendiente_btn: 'Marcar Pendiente',
@@ -383,7 +383,7 @@ export const translations = {
         saving: 'Saving…',
         error_creating_order: 'Error creating order. Check your connection or permissions.',
         error_missing_tenant: 'You do not have a company assigned. Please contact an administrator.',
-        back_to_dashboard: 'Back to Dashboard',
+        back_to_dashboard: 'Back',
         required_title: 'Title is required',
 
         status_pendiente_btn: 'Mark Pending',
@@ -606,7 +606,7 @@ export const translations = {
         saving: 'Salvando…',
         error_creating_order: 'Erro ao criar pedido. Verifique sua conexão ou permissões.',
         error_missing_tenant: 'Você não tem uma empresa atribuída. Entre em contato com um administrador.',
-        back_to_dashboard: 'Voltar para o Dashboard',
+        back_to_dashboard: 'Voltar',
         required_title: 'O título é obrigatório',
 
         status_pendiente_btn: 'Marcar Pendente',

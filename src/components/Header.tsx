@@ -35,7 +35,6 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
     const fileRef = useRef<HTMLInputElement>(null);
 
     const isOnPapelera = location.pathname === '/papelera';
-    const isOnAdmin = location.pathname === '/admin';
 
     useEffect(() => {
         function handleClick(e: MouseEvent) {
@@ -376,13 +375,15 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                         )}
                     </div>
                 )}
+            </div>
 
-                {session && isSuperAdmin && (
+            {session && isSuperAdmin && (
+                <div className="header-center" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
                     <Link to="/admin" className="header-admin-link">
                         Panel de administrador
                     </Link>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Right — Date/Time + nav icons (only when logged in) */}
             {session && (
