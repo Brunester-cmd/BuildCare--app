@@ -312,7 +312,9 @@ body,
 /* ── Header left (user dropdown) ──── */
 .header-left {
   position: relative;
-  /* margin-left: 1.5rem; Removed since it's now the first item */
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .user-menu-btn {
@@ -448,18 +450,31 @@ body,
 .search-clear {
   border: none;
   background: transparent;
-  cursor: pointer;
   color: var(--slate-400);
-  font-size: 0.8rem;
-  padding: 0;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  transition: color var(--transition);
+  cursor: pointer;
+  padding: 0 4px;
 }
 
 .search-clear:hover {
   color: var(--slate-600);
+}
+
+.header-admin-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  background: var(--slate-200);
+  color: var(--slate-800);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.header-admin-link:hover {
+  background: var(--slate-300);
+  transform: translateY(-1px);
 }
 
 .header-icon-btn {
@@ -575,26 +590,26 @@ body,
 }
 
 .filter-menu-toggle:hover {
-  border-color: var(--amber-400);
+  border-color: var(--slate-400);
   background: var(--slate-50);
 }
 
 .filter-menu-toggle.active {
-  border-color: var(--amber-500);
-  background: #fff7ed;
-  color: var(--amber-600);
+  border-color: var(--slate-500);
+  background: var(--slate-200);
+  color: var(--slate-800);
 }
 
 .filter-dropdown-menu {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  right: 0;
   z-index: 500;
   background: var(--slate-100);
   min-width: 260px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--slate-200);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--slate-300);
+  box-shadow: var(--shadow-md);
   padding: 0.5rem;
   animation: fadeIn 0.15s ease;
 }
@@ -1060,9 +1075,9 @@ body,
 .priority-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 100px;
-  font-size: 0.7rem;
+  font-size: 1.1rem;
   font-weight: 600;
   border: 1px solid;
   white-space: nowrap;
@@ -1072,8 +1087,8 @@ body,
 .meta-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.75rem;
+  gap: 0.4rem;
+  font-size: 1.2rem;
   color: var(--slate-500);
   white-space: nowrap;
 }
@@ -1278,15 +1293,15 @@ body,
 }
 
 .modal .detail-title {
-  font-size: 1.2rem;
+  font-size: 1.6rem;
 }
 
 .modal .detail-desc {
-  font-size: 0.92rem;
+  font-size: 1.25rem;
 }
 
 .modal .detail-meta-item {
-  font-size: 0.88rem;
+  font-size: 1.2rem;
 }
 
 /* Orange ghost buttons inside modals */
@@ -2555,14 +2570,14 @@ body,
 .order-number-badge {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  font-size: 0.68rem;
+  gap: 3px;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--slate-400);
   background: var(--slate-100);
   border: 1px solid var(--slate-200);
-  border-radius: 4px;
-  padding: 1px 5px;
+  border-radius: 6px;
+  padding: 2px 8px;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
 }

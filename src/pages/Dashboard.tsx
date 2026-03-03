@@ -66,7 +66,9 @@ export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: 
     const q = searchQuery.trim().toLowerCase();
     const filteredOrders = baseOrders.filter((o) => {
         // Search query filter
+        const cleanQ = q.replace('#', '');
         const matchesSearch = !q ||
+            String(o.orderNumber).padStart(4, '0').includes(cleanQ) ||
             o.titulo.toLowerCase().includes(q) ||
             o.descripcion.toLowerCase().includes(q) ||
             o.ubicacion.toLowerCase().includes(q) ||

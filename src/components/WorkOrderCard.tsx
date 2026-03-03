@@ -19,8 +19,9 @@ export default function WorkOrderCard({ order, onChangeStatus, onDelete, onView 
 
     function formatDate(iso: string) {
         const locale = lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-BR' : 'es-AR';
-        return new Date(iso).toLocaleDateString(locale, {
+        return new Date(iso).toLocaleString(locale, {
             day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
         });
     }
 
