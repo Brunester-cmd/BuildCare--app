@@ -22,7 +22,7 @@ function formatDate(iso: string) {
 type ActionItem = { status: Status; label: string; icon: typeof Play };
 const STATUS_ACTIONS: ActionItem[] = [
     { status: 'pendiente', label: 'Marcar Pendiente', icon: Play },
-    { status: 'en-pausa', label: 'Poner en Pausa', icon: Pause },
+    { status: 'en-pausa', label: 'Pausar', icon: Pause },
     { status: 'completada', label: 'Marcar Completada', icon: CheckCircle },
 ];
 

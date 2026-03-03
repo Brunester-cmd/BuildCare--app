@@ -120,7 +120,7 @@ export const translations = {
 
         // Dashboard
         pendientes: 'Pendientes',
-        en_pausa: 'En Pausa',
+        en_pausa: 'Pausadas',
         completadas: 'Completadas',
         no_pending: 'No hay órdenes pendientes',
         no_paused: 'No hay órdenes en pausa',
@@ -164,7 +164,7 @@ export const translations = {
         required_title: 'El título es requerido',
 
         status_pendiente_btn: 'Marcar Pendiente',
-        status_pausa_btn: 'Poner en Pausa',
+        status_pausa_btn: 'Pausar',
         status_completada_btn: 'Marcar Completada',
         actions: 'Acciones',
         change_status: 'Cambiar estado',
