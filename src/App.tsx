@@ -11,6 +11,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import HistoryPanel from './components/HistoryPanel';
+import { useWorkOrders } from './hooks/useWorkOrders';
 import './App.css';
 
 export default function App() {
@@ -25,6 +27,7 @@ export default function App() {
 
 function AppContent() {
   const { isSuperAdmin } = useAuth();
+  const { loadHistory } = useWorkOrders();
   const [searchQuery, setSearchQuery] = useState('');
   const [showHistory, setShowHistory] = useState(false);
 
@@ -50,8 +53,6 @@ function AppContent() {
               <Route path="/" element={
                 <Dashboard
                   searchQuery={searchQuery}
-                  showHistory={showHistory}
-                  onCloseHistory={() => setShowHistory(false)}
                 />
               } />
               <Route path="/papelera" element={<RecycleBin />} />
@@ -64,6 +65,13 @@ function AppContent() {
             <footer className="app-footer">
               © 2025 BuildCare – Sistema de Gestión Edilicia
             </footer>
+
+            {showHistory && (
+              <HistoryPanel
+                onClose={() => setShowHistory(false)}
+                loadHistory={loadHistory}
+              />
+            )}
           </div>
         </ProtectedRoute>
       } />

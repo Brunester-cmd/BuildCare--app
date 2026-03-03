@@ -23,14 +23,14 @@ export default function DayOrdersPage() {
     const [searchParams] = useSearchParams();
     const dateParam = searchParams.get('date'); // e.g. "2025-03-03"
 
-    const { allOrders, updateOrder, deleteOrder, changeStatus } = useWorkOrders();
+    const { activeOrders, updateOrder, deleteOrder, changeStatus } = useWorkOrders();
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
     // Parse the date
     const pageDate = dateParam ? new Date(dateParam + 'T12:00:00') : new Date();
     const dateString = pageDate.toISOString().split('T')[0];
 
-    const dayOrders: WorkOrder[] = allOrders.filter(order => {
+    const dayOrders: WorkOrder[] = activeOrders.filter(order => {
         const targetDate = order.fechaProgramada
             ? new Date(order.fechaProgramada)
             : new Date(order.creadoEn);
@@ -44,10 +44,10 @@ export default function DayOrdersPage() {
         day: 'numeric',
     });
 
-    const selectedOrder = allOrders.find(o => o.id === selectedOrderId);
+    const selectedOrder = activeOrders.find(o => o.id === selectedOrderId);
 
-    async function handleChangeStatus(id: string, status: Status) {
-        await changeStatus(id, status);
+    async function handleChangeStatus(id: string, status: Status, note?: string) {
+        await changeStatus(id, status, note);
     }
 
     return (

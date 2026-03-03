@@ -7,7 +7,7 @@ import { type WorkOrder, type Status, PRIORITY_LABELS, CATEGORY_LABELS, PRIORITY
 
 interface WorkOrderRowProps {
     order: WorkOrder;
-    onChangeStatus: (id: string, status: Status) => void;
+    onChangeStatus: (id: string, status: Status, note?: string) => void;
     onDelete: (id: string) => void;
     onView: (order: WorkOrder) => void;
 }
@@ -46,7 +46,26 @@ export default function WorkOrderRow({ order, onChangeStatus, onDelete, onView }
                 </div>
                 <div className="wo-row-info">
                     <h3 className="wo-row-title">{order.titulo}</h3>
-                    {order.descripcion && <p className="wo-row-desc">{order.descripcion}</p>}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        {order.descripcion && <p className="wo-row-desc">{order.descripcion}</p>}
+                        {order.observaciones && (
+                            <div className="pause-reason-tag" style={{
+                                fontSize: '0.75rem',
+                                color: 'var(--amber-700)',
+                                background: 'var(--amber-50)',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '1rem',
+                                width: 'fit-content',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                border: '1px solid var(--amber-100)'
+                            }}>
+                                <Pause size={10} />
+                                <strong>Motivo:</strong> {order.observaciones}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -66,7 +85,7 @@ export default function WorkOrderRow({ order, onChangeStatus, onDelete, onView }
                     <MoreVertical size={16} />
                 </button>
                 {menuOpen && (
-                    <div className="dropdown-menu dropdown-menu--left">
+                    <div className="dropdown-menu">
                         <div className="dropdown-close-row">
                             <span className="dropdown-title">Acciones</span>
                             <button className="dropdown-close-btn" onClick={() => setMenuOpen(false)} title="Cerrar">

@@ -108,7 +108,11 @@ export default function DayOrdersModal({ date, orders, onClose, onViewDay, onOrd
                     </button>
                     <button
                         className="btn btn-primary btn-sm btn-glow"
-                        onClick={() => { onNewOrder(date); onClose(); }}
+                        onClick={() => {
+                            console.log('DayOrdersModal: "Nueva Orden" clicked for date:', date);
+                            onNewOrder(date);
+                            onClose();
+                        }}
                     >
                         <Plus size={14} />
                         Nueva Orden

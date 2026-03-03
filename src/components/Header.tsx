@@ -388,9 +388,9 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
             {/* Right — Date/Time + nav icons (only when logged in) */}
             {session && (
                 <div className="header-right">
-                    <div className="header-datetime-box" style={{ display: 'flex', gap: '2rem', marginRight: '1rem', color: 'var(--slate-500)', fontSize: '0.9rem', fontWeight: 600, alignItems: 'center' }}>
+                    <div className="header-datetime-box" style={{ display: 'flex', gap: '2rem', marginRight: '1rem', color: 'var(--slate-500)', fontSize: '1.44rem', fontWeight: 600, alignItems: 'center' }}>
                         <span>{dateFormatted}</span>
-                        <span>{timeFormatted} hs</span>
+                        <span>{timeFormatted}</span>
                     </div>
 
                     {onHistoryToggle && (
@@ -406,7 +406,7 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
 
                     <button
                         className={`header-icon-btn ${isOnPapelera ? 'header-icon-btn--active' : ''}`}
-                        onClick={() => navigate(isOnPapelera ? '/' : '/papelera')}
+                        onClick={() => navigate('/papelera')}
                         title={t.trash}
                     >
                         <Trash2 size={18} />

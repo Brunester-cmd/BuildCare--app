@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,9 +15,18 @@ export default function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const [showPass, setShowPass] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail) {
+            setEmail(savedEmail);
+            setRememberMe(true);
+        }
+    }, []);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -28,6 +37,11 @@ export default function Login() {
         if (err) {
             setError(t.login_error);
         } else {
+            if (rememberMe) {
+                localStorage.setItem('rememberedEmail', email);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+            }
             navigate(from, { replace: true });
         }
     }
@@ -82,7 +96,16 @@ export default function Login() {
                                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
-                        <div style={{ textAlign: 'right', marginTop: '0.35rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                            <label className="auth-remember-me" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--slate-500)', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    style={{ accentColor: 'var(--amber-500)' }}
+                                />
+                                {(t as any).remember_me || 'Recordar usuario'}
+                            </label>
                             <Link to="/forgot-password" className="auth-link auth-link--sm">
                                 {t.forgot_password_link}
                             </Link>

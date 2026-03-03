@@ -4,6 +4,7 @@ import {
     Play, Pause, CheckCircle, Paperclip, FileText,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import DateInput from './DateInput';
 import { type WorkOrder, type Status, type Priority, type Category, PRIORITY_COLORS, CATEGORY_LABELS, type Profile } from '../types';
 import { useI18n } from '../hooks/useI18n';
 
@@ -12,12 +13,23 @@ interface OrderDetailModalProps {
     onClose: () => void;
     onUpdate: (id: string, changes: Partial<WorkOrder> & { files?: FileList | File[] }) => void;
     onDelete: (id: string) => void;
-    onChangeStatus: (id: string, status: Status) => void;
+    onChangeStatus: (id: string, status: Status, note?: string) => void;
 }
 
 function fmt(iso: string, lang: string) {
     const locale = lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-BR' : 'es-AR';
-    return new Date(iso).toLocaleString(locale, {
+    const date = new Date(iso);
+
+    // If it's a date-only string (no 'T'), it often results in 00:00:00.
+    // To avoid timezone shifts showing the previous day, we can check if it has time.
+    // If it's date-only, we use UTC to get the date parts or adjust for local.
+    if (!iso.includes('T')) {
+        return new Date(iso + 'T12:00:00').toLocaleDateString(locale, {
+            day: '2-digit', month: 'short', year: 'numeric'
+        });
+    }
+
+    return date.toLocaleString(locale, {
         day: '2-digit', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit',
     });
@@ -37,6 +49,7 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
         ubicacion: string;
         categoria: Category;
         asignadoA: string;
+        fechaProgramada: string;
         files: File[];
         existingAttachments: { url: string; name: string }[];
     }>({
@@ -46,11 +59,14 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
         ubicacion: order.ubicacion,
         categoria: order.categoria,
         asignadoA: order.asignadoA,
+        fechaProgramada: order.fechaProgramada || '',
         files: [],
         existingAttachments: order.attachments || [],
     });
     const [members, setMembers] = useState<Profile[]>([]);
     const [membersLoading, setMembersLoading] = useState(false);
+    const [pauseReason, setPauseReason] = useState('');
+    const [showPausePrompt, setShowPausePrompt] = useState(false);
 
     useEffect(() => {
         if (!editing) return;
@@ -83,6 +99,7 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
             ubicacion: order.ubicacion,
             categoria: order.categoria,
             asignadoA: order.asignadoA,
+            fechaProgramada: order.fechaProgramada || '',
             files: [],
             existingAttachments: order.attachments || [],
         });
@@ -130,16 +147,49 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                         key={status}
                                         className={`status-chip ${color}`}
                                         onClick={() => {
-                                            onChangeStatus(order.id, status);
-                                            if (status === 'completada') onClose();
+                                            if (status === 'en-pausa') {
+                                                setShowPausePrompt(true);
+                                            } else {
+                                                onChangeStatus(order.id, status);
+                                                if (status === 'completada') onClose();
+                                            }
                                         }}
                                     >
                                         <Icon size={13} />
-                                        {(t as any)[`status_${status.replace('-', '')}`]}
+                                        {status === 'en-pausa' ? 'Pausar' : (t as any)[`status_${status.replace('-', '')}`]}
                                     </button>
                                 );
                             })}
                     </div>
+
+                    {showPausePrompt && (
+                        <div className="pause-prompt" style={{ background: 'var(--slate-100)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', border: '1px solid var(--amber-500)' }}>
+                            <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Motivo:</label>
+                            <input
+                                className="form-input"
+                                value={pauseReason}
+                                onChange={(e) => setPauseReason(e.target.value)}
+                                placeholder="Ingrese el motivo de la pausa..."
+                                autoFocus
+                            />
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                                <button className="btn btn-ghost btn-sm" onClick={() => { setShowPausePrompt(false); setPauseReason(''); }}>
+                                    {t.cancel}
+                                </button>
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    disabled={!pauseReason.trim()}
+                                    onClick={() => {
+                                        onChangeStatus(order.id, 'en-pausa', pauseReason);
+                                        setShowPausePrompt(false);
+                                        setPauseReason('');
+                                    }}
+                                >
+                                    Confirmar Pausa
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {editing ? (
                         <div className="detail-edit-grid">
@@ -283,6 +333,13 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                     </label>
                                 </div>
                             </div>
+                            <div className="form-group">
+                                <label className="form-label">Fecha Programada</label>
+                                <DateInput
+                                    value={form.fechaProgramada}
+                                    onChange={(val) => setForm(p => ({ ...p, fechaProgramada: val }))}
+                                />
+                            </div>
 
                             {/* Moved to footer */}
                         </div>
@@ -291,6 +348,13 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                             <h3 className="detail-title">{order.titulo}</h3>
                             {order.descripcion && <p className="detail-desc">{order.descripcion}</p>}
                             <div className="detail-meta-grid">
+                                {order.observaciones && (
+                                    <div className="detail-meta-item" style={{ gridColumn: '1 / -1', background: 'rgba(245, 158, 11, 0.05)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--amber-500)', marginBottom: '0.5rem' }}>
+                                        <Clock size={14} style={{ color: 'var(--amber-600)' }} />
+                                        <span className="detail-meta-label">Motivo</span>
+                                        <span style={{ color: 'var(--slate-800)', fontWeight: 500, flex: 1 }}>{order.observaciones}</span>
+                                    </div>
+                                )}
                                 <div className="detail-meta-item">
                                     <Tag size={14} />
                                     <span className="detail-meta-label">{t.priority_label}</span>
@@ -389,8 +453,9 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                     <div className="modal-footer" style={{ justifyContent: 'space-between', marginTop: '1.5rem' }}>
                         {editing ? (
                             <>
-                                <button className="btn btn-ghost" onClick={() => setEditing(false)}>
-                                    {t.cancel}
+                                <button className="btn btn-primary" onClick={handleSave}>
+                                    <Save size={18} />
+                                    {t.save}
                                 </button>
 
                                 <button className="btn btn-danger" onClick={handleDelete} style={{ margin: '0 auto' }}>
@@ -398,18 +463,17 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                     {t.delete_order}
                                 </button>
 
-                                <button className="btn btn-primary" onClick={handleSave}>
-                                    <Save size={18} />
-                                    {t.save}
+                                <button className="btn btn-ghost" onClick={() => setEditing(false)}>
+                                    {t.cancel}
                                 </button>
                             </>
                         ) : (
                             <>
-                                <button className="btn btn-ghost" onClick={onClose}>
-                                    {t.close}
-                                </button>
                                 <button className="btn btn-primary" onClick={() => setEditing(true)}>
                                     {t.edit}
+                                </button>
+                                <button className="btn btn-ghost" onClick={onClose}>
+                                    {t.close}
                                 </button>
                             </>
                         )}

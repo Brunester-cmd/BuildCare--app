@@ -36,12 +36,16 @@ export default function CalendarView({ orders, onOrderClick, onViewDay, onNewOrd
         }
         for (let i = 1; i <= daysInMonth; i++) {
             const date = new Date(year, month, i);
-            const dateString = date.toISOString().split('T')[0];
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const dStr = String(date.getDate()).padStart(2, '0');
+            const dateString = `${y}-${m}-${dStr}`;
+
             const dayOrders = orders.filter(order => {
-                const targetDate = order.fechaProgramada
-                    ? new Date(order.fechaProgramada)
-                    : new Date(order.creadoEn);
-                return targetDate.toISOString().split('T')[0] === dateString;
+                const f = order.fechaProgramada;
+                const c = order.creadoEn;
+                const datePart = f ? f.split('T')[0] : c.split('T')[0];
+                return datePart === dateString;
             });
             output.push({ date, orders: dayOrders });
         }
@@ -60,7 +64,6 @@ export default function CalendarView({ orders, onOrderClick, onViewDay, onNewOrd
 
     const monthName = currentDate.toLocaleString('es-AR', { month: 'long' });
     const year = currentDate.getFullYear();
-    const todayStr = new Date().toISOString().split('T')[0];
     const isCurrentMonth =
         new Date().getMonth() === currentDate.getMonth() &&
         new Date().getFullYear() === currentDate.getFullYear();
@@ -114,8 +117,6 @@ export default function CalendarView({ orders, onOrderClick, onViewDay, onNewOrd
                 {/* Fixed-size 7-column grid */}
                 <div className="calendar-grid">
                     {days.map((cell, idx) => {
-                        const isToday = cell.date &&
-                            cell.date.toISOString().split('T')[0] === todayStr;
                         const hasOrders = cell.orders.length > 0;
 
                         return (
@@ -124,7 +125,6 @@ export default function CalendarView({ orders, onOrderClick, onViewDay, onNewOrd
                                 className={[
                                     'calendar-cell',
                                     !cell.date ? 'calendar-cell--empty' : '',
-                                    isToday ? 'calendar-cell--today' : '',
                                     cell.date && hasOrders ? 'calendar-cell--has-orders' : '',
                                     cell.date ? 'calendar-cell--clickable' : '',
                                 ].join(' ')}
@@ -165,25 +165,27 @@ export default function CalendarView({ orders, onOrderClick, onViewDay, onNewOrd
             </div>
 
             {/* Day orders popup modal */}
-            {selectedDay && (
-                <DayOrdersModal
-                    date={selectedDay.date}
-                    orders={selectedDay.orders}
-                    onClose={() => setSelectedDay(null)}
-                    onViewDay={(date) => {
-                        setSelectedDay(null);
-                        onViewDay?.(date);
-                    }}
-                    onOrderClick={(orderId) => {
-                        setSelectedDay(null);
-                        onOrderClick?.(orderId);
-                    }}
-                    onNewOrder={(date) => {
-                        setSelectedDay(null);
-                        onNewOrder?.(date);
-                    }}
-                />
-            )}
-        </div>
+            {
+                selectedDay && (
+                    <DayOrdersModal
+                        date={selectedDay.date}
+                        orders={selectedDay.orders}
+                        onClose={() => setSelectedDay(null)}
+                        onViewDay={(date) => {
+                            setSelectedDay(null);
+                            onViewDay?.(date);
+                        }}
+                        onOrderClick={(orderId) => {
+                            setSelectedDay(null);
+                            onOrderClick?.(orderId);
+                        }}
+                        onNewOrder={(date) => {
+                            setSelectedDay(null);
+                            onNewOrder?.(date);
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 }

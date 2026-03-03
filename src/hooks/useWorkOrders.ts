@@ -30,6 +30,7 @@ function dbToLocal(row: Record<string, unknown>): WorkOrder {
         estado: row.deleted ? 'eliminada' : row.estado as Status,
         attachments: (row.attachments as any[])?.filter(a => a && a.url) ?? [],
         fechaProgramada: row.fecha_programada as string | undefined,
+        observaciones: row.observaciones as string | undefined,
         eliminadoEn: row.deleted_at as string | undefined,
         creadoEn: row.created_at as string,
         actualizadoEn: row.updated_at as string,
@@ -126,11 +127,16 @@ export function useWorkOrders() {
 
     // ── CRUD ─────────────────────────────────────────────────
     const createOrder = useCallback(async (data: NewOrderData): Promise<WorkOrder | null> => {
-        if (!tenantId || !profile?.id) return null;
+        console.log('useWorkOrders: createOrder called with:', data);
+        if (!tenantId || !profile?.id) {
+            console.warn('useWorkOrders: createOrder aborted. tenantId:', tenantId, 'profileId:', profile?.id);
+            return null;
+        }
 
         const attachments: { url: string; name: string }[] = [];
 
         if (data.files && data.files.length > 0) {
+            console.log('useWorkOrders: Uploading', data.files.length, 'files...');
             const fileList = Array.from(data.files);
             for (const file of fileList) {
                 const fileExt = file.name.split('.').pop();
@@ -144,10 +150,13 @@ export function useWorkOrders() {
                         .from('work_order_attachments')
                         .getPublicUrl(filePath);
                     attachments.push({ url: publicUrl, name: file.name });
+                } else {
+                    console.error('useWorkOrders: File upload error:', uploadError);
                 }
             }
         }
 
+        console.log('useWorkOrders: Inserting to DB...');
         const { data: row, error: insertError } = await supabase
             .from('work_orders')
             .insert({
@@ -163,16 +172,19 @@ export function useWorkOrders() {
             .single();
 
         if (insertError) {
-            console.error('Error inserting work order:', insertError);
+            console.error('useWorkOrders: Insert error:', insertError);
             return null;
         }
-        if (!row) return null;
-        const newOrder = dbToLocal(row as Record<string, unknown>);
+        if (!row) {
+            console.warn('useWorkOrders: No row returned after insert');
+            return null;
+        }
 
-        // Manual state update for immediate UI feedback
+        const newOrder = dbToLocal(row as Record<string, unknown>);
+        console.log('useWorkOrders: Success! New order:', newOrder);
+
         setAllOrders((prev) => [newOrder, ...prev]);
 
-        // History
         void writeHistory(newOrder.id, tenantId, profile.id, profile.full_name ?? undefined, 'created', {
             newStatus: 'pendiente',
             note: `Orden #${newOrder.orderNumber} creada`,
@@ -180,18 +192,29 @@ export function useWorkOrders() {
         return newOrder;
     }, [tenantId, profile?.id, profile?.full_name]);
 
-    const changeStatus = useCallback(async (id: string, estado: Status) => {
-        // Optimistic update — apply immediately so the UI reacts at once
+    const changeStatus = useCallback(async (id: string, estado: Status, note?: string) => {
+        // Optimistic update
         setAllOrders((prev) =>
-            prev.map((o) => o.id === id ? { ...o, estado, actualizadoEn: new Date().toISOString() } : o)
+            prev.map((o) => o.id === id ? {
+                ...o,
+                estado,
+                observaciones: note ?? o.observaciones,
+                actualizadoEn: new Date().toISOString()
+            } : o)
         );
         const current = allOrders.find((o) => o.id === id);
-        await supabase.from('work_orders').update({ estado: estado as WoStatus }).eq('id', id);
+
+        const updates: any = { estado: estado as WoStatus };
+        if (note) updates.observaciones = note;
+
+        await supabase.from('work_orders').update(updates).eq('id', id);
+
         // History
         if (tenantId && current) {
             void writeHistory(id, tenantId, profile?.id, profile?.full_name ?? undefined, 'status_changed', {
                 oldStatus: current.estado,
                 newStatus: estado,
+                note: note
             });
         }
     }, [allOrders, tenantId, profile?.id, profile?.full_name]);

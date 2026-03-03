@@ -1,68 +1,54 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Save, Paperclip, FileText, User } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import type { NewOrderData } from '../hooks/useWorkOrders';
 import { type Priority, type Category, CATEGORY_LABELS, type Profile } from '../types';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../contexts/AuthContext';
+import DateInput from './DateInput';
 
 interface NewOrderModalProps {
     onClose: () => void;
     onCreate: (data: NewOrderData) => Promise<unknown>;
     initialDate?: Date;
+    members?: Profile[];
 }
 
 const PRIORITIES: Priority[] = ['baja', 'media', 'alta', 'urgente'];
 const CATEGORIES = Object.keys(CATEGORY_LABELS) as Category[];
 
-export default function NewOrderModal({ onClose, onCreate, initialDate }: NewOrderModalProps) {
+export default function NewOrderModal({ onClose, onCreate, initialDate, members = [] }: NewOrderModalProps) {
     const { t } = useI18n();
     const { profile, tenant, refreshProfile } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Call refreshProfile when modal mounts as a failsafe
-    useState(() => {
+    useEffect(() => {
+        console.log('NewOrderModal: mounted. initialDate:', initialDate);
         void refreshProfile();
-    });
-    const [form, setForm] = useState<NewOrderData>({
-        titulo: '',
-        descripcion: '',
-        prioridad: 'media',
-        ubicacion: '',
-        categoria: 'otro',
-        asignadoA: '',
-        fechaProgramada: initialDate ? initialDate.toISOString().split('T')[0] : '',
-        files: [],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const [form, setForm] = useState<NewOrderData>(() => {
+        let initialFecha = '';
+        if (initialDate) {
+            const y = initialDate.getFullYear();
+            const m = String(initialDate.getMonth() + 1).padStart(2, '0');
+            const dStr = String(initialDate.getDate()).padStart(2, '0');
+            initialFecha = `${y}-${m}-${dStr}`;
+        }
+        return {
+            titulo: '',
+            descripcion: '',
+            prioridad: 'media',
+            ubicacion: '',
+            categoria: 'otro',
+            asignadoA: '',
+            fechaProgramada: initialFecha,
+            files: [],
+        };
     });
     const [titleError, setTitleError] = useState('');
     const [submitError, setSubmitError] = useState('');
     const [saving, setSaving] = useState(false);
-    const [members, setMembers] = useState<Profile[]>([]);
-    const [membersLoading, setMembersLoading] = useState(false);
-
-    useEffect(() => {
-        async function fetchMembers() {
-            const tenantId = tenant?.id || profile?.tenant_id;
-            if (!tenantId) return;
-
-            setMembersLoading(true);
-            try {
-                const { data } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('tenant_id', tenantId)
-                    .eq('status', 'active')
-                    .order('full_name');
-
-                if (data) setMembers(data);
-            } catch (err) {
-                console.error('Error fetching members:', err);
-            } finally {
-                setMembersLoading(false);
-            }
-        }
-        void fetchMembers();
-    }, [tenant, profile]);
 
     function set<K extends keyof NewOrderData>(field: K, value: NewOrderData[K]) {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -94,9 +80,12 @@ export default function NewOrderModal({ onClose, onCreate, initialDate }: NewOrd
         }
 
         setSaving(true);
+        console.log('Attempting to create order with data:', form);
         try {
             const result = await onCreate(form);
+            console.log('Order creation result:', result);
             if (!result) {
+                console.warn('onCreate returned null');
                 setSubmitError(t.error_creating_order || 'Error al crear la orden. Verificá tu conexión o permisos.');
                 return;
             }
@@ -133,15 +122,6 @@ export default function NewOrderModal({ onClose, onCreate, initialDate }: NewOrd
                         {titleError && <span className="form-error">{titleError}</span>}
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Fecha Programada (Opcional)</label>
-                        <input
-                            type="date"
-                            className="form-input"
-                            value={form.fechaProgramada || ''}
-                            onChange={(e) => set('fechaProgramada', e.target.value)}
-                        />
-                    </div>
 
                     <div className="form-group">
                         <label className="form-label">{t.description_label}</label>
@@ -208,7 +188,7 @@ export default function NewOrderModal({ onClose, onCreate, initialDate }: NewOrd
                                         set('asignadoA', [...current, val].join(', '));
                                     }
                                 }}
-                                disabled={membersLoading}
+                                disabled={false}
                             >
                                 <option value="">{t.select_assignee || 'Seleccionar operario'}</option>
                                 {members.map((m) => {
@@ -241,6 +221,14 @@ export default function NewOrderModal({ onClose, onCreate, initialDate }: NewOrd
                                 ))}
                             </div>
                         )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Fecha Programada (Opcional)</label>
+                        <DateInput
+                            value={form.fechaProgramada || ''}
+                            onChange={(val) => set('fechaProgramada', val)}
+                        />
                     </div>
 
                     <div className="form-group">
