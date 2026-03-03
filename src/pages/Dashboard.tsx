@@ -12,18 +12,17 @@ import OrderDetailModal from '../components/OrderDetailModal';
 import HistoryPanel from '../components/HistoryPanel';
 import CalendarView from '../components/CalendarView';
 import { useI18n } from '../hooks/useI18n';
-import { useLocation } from 'react-router-dom';
 
 
 type ActiveFilter = 'pendiente' | 'en-pausa' | 'completada' | 'todas';
 
 interface DashboardProps {
-    // searchQuery: string; // Now managed internally
-    // showHistory: boolean; // Now managed internally
-    // onCloseHistory: () => void; // Now managed internally
+    searchQuery: string;
+    showHistory: boolean;
+    onCloseHistory: () => void;
 }
 
-export default function Dashboard({ /* searchQuery, showHistory, onCloseHistory */ }: DashboardProps) {
+export default function Dashboard({ searchQuery, showHistory, onCloseHistory }: DashboardProps) {
     const {
         loading,
         allOrders,
@@ -37,7 +36,6 @@ export default function Dashboard({ /* searchQuery, showHistory, onCloseHistory 
     const [view, setView] = useState<'grid' | 'list' | 'calendar'>('grid');
     const [showNewModal, setShowNewModal] = useState(false);
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
 
     // Advanced Filters & Sort State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -48,7 +46,6 @@ export default function Dashboard({ /* searchQuery, showHistory, onCloseHistory 
     const [activeSubmenu, setActiveSubmenu] = useState<'sort' | 'priority' | 'category' | 'assignee' | null>(null);
     const [members, setMembers] = useState<Profile[]>([]);
     const [scheduleDate, setScheduleDate] = useState<Date | undefined>(undefined);
-    const location = useLocation();
 
     useState(() => {
         async function fetchMembers() {
@@ -122,10 +119,6 @@ export default function Dashboard({ /* searchQuery, showHistory, onCloseHistory 
     }
 
     const selectedOrder = allOrders.find(o => o.id === selectedOrderId);
-
-    // History panel visibility (now internal)
-    const [showHistory, setShowHistory] = useState(false);
-    const onCloseHistory = () => setShowHistory(false);
 
     if (loading) return (
         <main className="main-content">
