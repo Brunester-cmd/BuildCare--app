@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Trash2, Search, Settings, LogOut, ChevronDown, ChevronRight,
-    UserCircle, Bell, Shield, LogIn, Lock, Clock, Camera, Globe, Download,
+    UserCircle, Bell, LogIn, Lock, Clock, Camera, Globe, Download,
     Palette, Check
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -156,15 +156,6 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                                     </div>
                                     <div className="dropdown-divider" />
 
-                                    {isSuperAdmin && (
-                                        <>
-                                            <button className="dropdown-item dropdown-item--admin" onClick={() => { navigate('/admin'); setUserMenuOpen(false); }}>
-                                                <Shield size={15} />
-                                                {t.admin_panel}
-                                            </button>
-                                            <div className="dropdown-divider" />
-                                        </>
-                                    )}
 
                                     {/* Configuración section */}
                                     <button
