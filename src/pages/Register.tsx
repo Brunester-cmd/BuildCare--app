@@ -56,7 +56,7 @@ export default function Register() {
                     setError(t.registration_error_exists);
                 }
             } else {
-                setError(t.registration_error_generic);
+                setError(`Error de Supabase: ${err.message}`);
             }
         } else {
             // signUp succeeded (or fake success due to email enumeration protection).
