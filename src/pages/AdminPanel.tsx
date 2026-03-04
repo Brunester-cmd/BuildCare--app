@@ -4,7 +4,7 @@ import {
     Building2, Users, Clock, CheckCircle, XCircle,
     Trash2, Plus, Search, RefreshCw, ArrowLeft,
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { fetchApi } from '../lib/api';
 import type { Profile, Tenant } from '../types';
 import { useI18n } from '../hooks/useI18n';
 
@@ -33,16 +33,19 @@ export default function AdminPanel() {
 
     const load = useCallback(async () => {
         setLoading(true);
-        const [{ data: t_data }, { data: p_data }] = await Promise.all([
-            supabase.from('tenants').select('*').order('created_at', { ascending: false }),
-            supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        ]);
-
-        setTenants((t_data ?? []) as Tenant[]);
-        const all = (p_data ?? []) as PendingUser[];
-        setAllUsers(all);
-        setPendingUsers(all.filter(u => u.status === 'pending'));
-        setLoading(false);
+        try {
+            const [tenantsData, profilesData] = await Promise.all([
+                fetchApi<Tenant[]>('/tenants'),
+                fetchApi<PendingUser[]>('/profiles'),
+            ]);
+            setTenants(tenantsData);
+            setAllUsers(profilesData);
+            setPendingUsers(profilesData.filter(u => u.status === 'pending'));
+        } catch (err) {
+            console.error('AdminPanel load error:', err);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     useEffect(() => { void load(); }, [load]);
@@ -50,46 +53,22 @@ export default function AdminPanel() {
     async function approveUser(userId: string) {
         setLoading(true);
         try {
-            // 1. Get user profile to see their requested company
-            const { data: userProf } = await supabase
-                .from('profiles')
-                .select('company_name')
-                .eq('id', userId)
-                .single();
-
+            const userProf = allUsers.find(u => u.id === userId);
             const companyName = userProf?.company_name?.trim();
             let targetTenantId: string | null = null;
 
             if (companyName) {
-                // 2. Check if tenant exists
-                const { data: existing } = await supabase
-                    .from('tenants')
-                    .select('id')
-                    .ilike('name', companyName)
-                    .single();
-
+                const existing = tenants.find(t => t.name.toLowerCase() === companyName.toLowerCase());
                 if (existing) {
                     targetTenantId = existing.id;
                 } else {
-                    // 3. Create new tenant
                     const slug = companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                    const { data: newTen, error: tenErr } = await supabase
-                        .from('tenants')
-                        .insert({ name: companyName, slug })
-                        .select()
-                        .single();
-                    if (!tenErr && newTen) {
-                        targetTenantId = newTen.id;
-                    }
+                    const newTen = await fetchApi<Tenant>('/tenants', { method: 'POST', body: JSON.stringify({ name: companyName, slug }) });
+                    targetTenantId = newTen.id;
                 }
             }
 
-            // 4. Update profile
-            await supabase.from('profiles').update({
-                status: 'active',
-                tenant_id: targetTenantId
-            }).eq('id', userId);
-
+            await fetchApi(`/profiles/${userId}`, { method: 'PUT', body: JSON.stringify({ status: 'active', tenant_id: targetTenantId }) });
             await load();
         } catch (err) {
             console.error('Error approving user:', err);
@@ -99,14 +78,14 @@ export default function AdminPanel() {
     }
 
     async function rejectUser(userId: string) {
-        await supabase.from('profiles').update({ status: 'suspended' }).eq('id', userId);
+        await fetchApi(`/profiles/${userId}`, { method: 'PUT', body: JSON.stringify({ status: 'suspended' }) });
         await load();
     }
 
     async function createTenant() {
         if (!newTenantName.trim()) return;
         const slug = newTenantName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        await supabase.from('tenants').insert({ name: newTenantName.trim(), slug });
+        await fetchApi('/tenants', { method: 'POST', body: JSON.stringify({ name: newTenantName.trim(), slug }) });
         setNewTenantName('');
         setAddingTenant(false);
         await load();
@@ -114,13 +93,12 @@ export default function AdminPanel() {
 
     async function toggleTenant(id: string, active: boolean) {
         const newActive = !active;
-        await supabase.from('tenants').update({ active: newActive }).eq('id', id);
-        // Cascade: suspend all users when deactivating, reactivate them when activating
-        if (!newActive) {
-            await supabase.from('profiles').update({ status: 'suspended' }).eq('tenant_id', id).neq('role', 'super_admin');
-        } else {
-            await supabase.from('profiles').update({ status: 'active' }).eq('tenant_id', id).neq('role', 'super_admin');
-        }
+        await fetchApi(`/tenants/${id}`, { method: 'PUT', body: JSON.stringify({ active: newActive }) });
+        // Cascade suspend/activate all users in tenant
+        const usersInTenant = allUsers.filter(u => u.tenant_id === id && u.role !== 'super_admin');
+        await Promise.all(usersInTenant.map(u =>
+            fetchApi(`/profiles/${u.id}`, { method: 'PUT', body: JSON.stringify({ status: newActive ? 'active' : 'suspended' }) })
+        ));
         await load();
     }
 
@@ -128,8 +106,7 @@ export default function AdminPanel() {
         if (!window.confirm(t.delete_user_confirm)) return;
         setLoading(true);
         try {
-            const { error } = await supabase.from('profiles').delete().eq('id', id);
-            if (error) throw error;
+            await fetchApi(`/profiles/${id}`, { method: 'DELETE' });
             await load();
         } catch (err) {
             console.error('Error deleting user:', err);
@@ -143,12 +120,7 @@ export default function AdminPanel() {
         if (!window.confirm(t.delete_company_confirm)) return;
         setLoading(true);
         try {
-            // Sequential deletion to handle foreign keys (if cascade not set in DB)
-            await supabase.from('work_order_history').delete().eq('tenant_id', id);
-            await supabase.from('work_orders').delete().eq('tenant_id', id);
-            await supabase.from('profiles').delete().eq('tenant_id', id);
-            const { error } = await supabase.from('tenants').delete().eq('id', id);
-            if (error) throw error;
+            await fetchApi(`/tenants/${id}`, { method: 'DELETE' });
             await load();
         } catch (err) {
             console.error('Error deleting tenant:', err);
@@ -163,40 +135,21 @@ export default function AdminPanel() {
             alert('Completa los campos obligatorios: Nombre, Email y Contraseña');
             return;
         }
-
         setLoading(true);
         try {
-            const { data, error } = await supabase.auth.signUp({
-                email: newUserForm.email,
-                password: newUserForm.password,
-                options: {
-                    data: {
-                        full_name: newUserForm.fullName,
-                        role: newUserForm.role,
-                        status: 'active'
-                    }
-                }
-            });
-
-            if (error) throw error;
-
-            if (data?.user) {
-                const newProfile = {
-                    id: data.user.id,
+            await fetchApi('/users', {
+                method: 'POST',
+                body: JSON.stringify({
                     email: newUserForm.email,
+                    password: newUserForm.password,
                     full_name: newUserForm.fullName,
                     role: newUserForm.role,
                     status: 'active',
                     tenant_id: newUserForm.tenant_id || null,
-                    company_name: tenants.find(t => t.id === newUserForm.tenant_id)?.name || ''
-                };
-
-                const { error: upsertErr } = await supabase.from('profiles').upsert(newProfile);
-                if (upsertErr) console.warn("Upsert failed, trigger might have handled it:", upsertErr);
-
-                alert(`¡Usuario ${newUserForm.fullName} creado!\n\nSe enviará un correo a ${newUserForm.email} para que pueda acceder (si tienes "Confirm email" activado en tu panel de Supabase).`);
-            }
-
+                    company_name: tenants.find(t => t.id === newUserForm.tenant_id)?.name || '',
+                }),
+            });
+            alert(`¡Usuario ${newUserForm.fullName} creado!`);
             setAddingUser(false);
             setNewUserForm({ fullName: '', email: '', password: '', tenant_id: '', role: 'user' });
             await load();

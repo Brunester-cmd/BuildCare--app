@@ -1,0 +1,20 @@
+name = "sgo-backend"
+main = "worker/index.ts"
+compatibility_date = "2024-03-04"
+
+# We will use Cloudflare Pages to host the frontend (React + Vite)
+# The backend API will be part of the Pages Functions or a separate Worker.
+# To keep things simple and unified, let's configure this as a Worker that
+# serves an API and we can deploy the React app via Pages.
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+# We will create this database in a moment and add the ID here
+database_name = "sgo-db"
+database_id = "5ade44db-689f-411b-b579-8e0401396b27"
+
+[vars]
+# Any environment variables can go here

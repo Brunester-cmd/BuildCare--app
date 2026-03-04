@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
 
 function canNotify() {
     return 'Notification' in window && 'serviceWorker' in navigator;
@@ -21,17 +20,11 @@ export function usePushNotifications(userId: string | undefined) {
     const [pushEnabled, setPushEnabled] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    // Load current preference from profile
+    // Load current preference — stubbed until Worker profile API is ready
     useEffect(() => {
         if (!userId) return;
-        supabase
-            .from('profiles')
-            .select('push_enabled')
-            .eq('id', userId)
-            .single()
-            .then(({ data }) => {
-                if (data) setPushEnabled(data.push_enabled ?? false);
-            });
+        // TODO: fetch from /api/profiles/:userId when Worker endpoint is ready
+        setPushEnabled(false);
     }, [userId]);
 
     const enable = useCallback(async (): Promise<boolean> => {
@@ -50,25 +43,16 @@ export function usePushNotifications(userId: string | undefined) {
         const reg = await getRegistration();
         if (!reg) { setLoading(false); return false; }
 
-        // Save preference
-        if (userId) {
-            await supabase
-                .from('profiles')
-                .update({ push_enabled: true })
-                .eq('id', userId);
-        }
+        // TODO: Save preference via Worker API
+        // await fetchApi(`/profiles/${userId}`, { method: 'PUT', body: JSON.stringify({ push_enabled: true }) });
         setPushEnabled(true);
         setLoading(false);
         return true;
     }, [userId]);
 
     const disable = useCallback(async () => {
-        if (userId) {
-            await supabase
-                .from('profiles')
-                .update({ push_enabled: false, push_subscription: null })
-                .eq('id', userId);
-        }
+        // TODO: Save preference via Worker API
+        // await fetchApi(`/profiles/${userId}`, { method: 'PUT', body: JSON.stringify({ push_enabled: false }) });
         setPushEnabled(false);
     }, [userId]);
 

@@ -3,7 +3,7 @@ import {
     X, MapPin, User, Tag, Calendar, Clock, Save, Trash2,
     Play, Pause, CheckCircle, Paperclip, FileText,
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { fetchApi } from '../lib/api';
 import DateInput from './DateInput';
 import { type WorkOrder, type Status, type Priority, type Category, PRIORITY_COLORS, CATEGORY_LABELS, type Profile } from '../types';
 import { useI18n } from '../hooks/useI18n';
@@ -19,16 +19,11 @@ interface OrderDetailModalProps {
 function fmt(iso: string, lang: string) {
     const locale = lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-BR' : 'es-AR';
     const date = new Date(iso);
-
-    // If it's a date-only string (no 'T'), it often results in 00:00:00.
-    // To avoid timezone shifts showing the previous day, we can check if it has time.
-    // If it's date-only, we use UTC to get the date parts or adjust for local.
     if (!iso.includes('T')) {
         return new Date(iso + 'T12:00:00').toLocaleDateString(locale, {
             day: '2-digit', month: 'short', year: 'numeric'
         });
     }
-
     return date.toLocaleString(locale, {
         day: '2-digit', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit',
@@ -75,13 +70,8 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
             if (!order.tenant_id) return;
             setMembersLoading(true);
             try {
-                const { data } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('tenant_id', order.tenant_id)
-                    .eq('status', 'active')
-                    .order('full_name');
-                if (data) setMembers(data);
+                const data = await fetchApi<Profile[]>(`/profiles?tenant_id=${order.tenant_id}&status=active`);
+                setMembers(data);
             } catch (err) {
                 console.error('Error fetching members:', err);
             } finally {

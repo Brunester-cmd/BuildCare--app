@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { showLocalNotification } from './usePushNotifications';
-import type { WorkOrder, WorkOrderHistory, Status, Priority, Category, WoStatus, HistoryEventType } from '../types';
+import { fetchApi } from '../lib/api';
+import type { WorkOrder, WorkOrderHistory, Status, Priority, Category } from '../types';
 
 // ── Shape returned by this hook ───────────────────────────────
 export interface NewOrderData {
@@ -18,6 +18,13 @@ export interface NewOrderData {
 
 /** DB row → local WorkOrder */
 function dbToLocal(row: Record<string, unknown>): WorkOrder {
+    let attachments: { url: string; name: string }[] = [];
+    try {
+        const raw = row.attachments;
+        if (typeof raw === 'string') attachments = JSON.parse(raw);
+        else if (Array.isArray(raw)) attachments = raw;
+    } catch { /* ignore */ }
+
     return {
         id: row.id as string,
         orderNumber: (row.order_number as number) ?? 0,
@@ -28,7 +35,7 @@ function dbToLocal(row: Record<string, unknown>): WorkOrder {
         categoria: row.categoria as Category,
         asignadoA: (row.asignado_a as string) ?? '',
         estado: row.deleted ? 'eliminada' : row.estado as Status,
-        attachments: (row.attachments as any[])?.filter(a => a && a.url) ?? [],
+        attachments: attachments.filter(a => a && a.url),
         fechaProgramada: row.fecha_programada as string | undefined,
         observaciones: row.observaciones as string | undefined,
         eliminadoEn: row.deleted_at as string | undefined,
@@ -38,85 +45,32 @@ function dbToLocal(row: Record<string, unknown>): WorkOrder {
     };
 }
 
-/** Write a history event to Supabase */
-async function writeHistory(
-    workOrderId: string,
-    tenantId: string,
-    userId: string | undefined,
-    userName: string | undefined,
-    eventType: HistoryEventType,
-    opts?: { oldStatus?: string; newStatus?: string; note?: string }
-) {
-    await supabase.from('work_order_history').insert({
-        work_order_id: workOrderId,
-        tenant_id: tenantId,
-        user_id: userId ?? null,
-        user_name: userName ?? null,
-        event_type: eventType,
-        old_status: opts?.oldStatus ?? null,
-        new_status: opts?.newStatus ?? null,
-        note: opts?.note ?? null,
-    });
+function generateId() {
+    return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
 }
 
 export function useWorkOrders() {
     const { profile, tenant } = useAuth();
     const [allOrders, setAllOrders] = useState<WorkOrder[]>([]);
     const [loading, setLoading] = useState(true);
-    const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
     const tenantId = tenant?.id ?? profile?.tenant_id;
 
-    // ── Load all orders ───────────────────────────────────────
+    // ── Load all orders from Worker API ───────────────────────
     const loadOrders = useCallback(async () => {
         if (!tenantId) { setLoading(false); return; }
-        const { data, error } = await supabase
-            .from('work_orders')
-            .select('*')
-            .eq('tenant_id', tenantId)
-            .order('order_number', { ascending: false });
-        if (!error && data) setAllOrders(data.map(dbToLocal));
-        setLoading(false);
+        try {
+            const data = await fetchApi<Record<string, unknown>[]>(`/orders?tenant_id=${tenantId}`);
+            setAllOrders(data.map(dbToLocal));
+        } catch (err) {
+            console.error('useWorkOrders: loadOrders error:', err);
+            setAllOrders([]);
+        } finally {
+            setLoading(false);
+        }
     }, [tenantId]);
 
     useEffect(() => { void loadOrders(); }, [loadOrders]);
-
-    // ── Realtime ─────────────────────────────────────────────
-    useEffect(() => {
-        if (!tenantId) return;
-        if (channelRef.current) supabase.removeChannel(channelRef.current);
-
-        const channel = supabase
-            .channel(`work_orders:${tenantId}`)
-            .on('postgres_changes', {
-                event: '*', schema: 'public',
-                table: 'work_orders',
-                filter: `tenant_id=eq.${tenantId}`,
-            }, async (payload) => {
-                if (payload.eventType === 'INSERT') {
-                    const newOrder = dbToLocal(payload.new as Record<string, unknown>);
-                    setAllOrders((prev) => {
-                        if (prev.find(o => o.id === newOrder.id)) return prev;
-                        return [newOrder, ...prev];
-                    });
-                    if ((payload.new as any).created_by !== profile?.id) {
-                        void showLocalNotification("BuildCare – Nueva Orden", `📋 #${newOrder.orderNumber} ${newOrder.titulo}`);
-                    }
-                } else if (payload.eventType === 'UPDATE') {
-                    const updated = dbToLocal(payload.new as Record<string, unknown>);
-                    setAllOrders((prev) => prev.map(o => o.id === updated.id ? updated : o));
-                } else if (payload.eventType === 'DELETE') {
-                    const id = (payload.old as any).id;
-                    setAllOrders((prev) => prev.filter(o => o.id !== id));
-                } else {
-                    void loadOrders();
-                }
-            })
-            .subscribe();
-
-        channelRef.current = channel;
-        return () => { supabase.removeChannel(channel); };
-    }, [tenantId, profile?.id, loadOrders]);
 
     // ── Derived state ─────────────────────────────────────────
     const activeOrders = allOrders.filter((o) => o.estado !== 'eliminada');
@@ -127,72 +81,49 @@ export function useWorkOrders() {
 
     // ── CRUD ─────────────────────────────────────────────────
     const createOrder = useCallback(async (data: NewOrderData): Promise<WorkOrder | null> => {
-        console.log('useWorkOrders: createOrder called with:', data);
-        if (!tenantId || !profile?.id) {
-            console.warn('useWorkOrders: createOrder aborted. tenantId:', tenantId, 'profileId:', profile?.id);
-            return null;
-        }
+        if (!tenantId || !profile?.id) return null;
 
+        // Upload files to Worker (stub: no storage yet)
         const attachments: { url: string; name: string }[] = [];
+        // TODO: implement file uploads via Cloudflare R2/Worker once configured
 
-        if (data.files && data.files.length > 0) {
-            console.log('useWorkOrders: Uploading', data.files.length, 'files...');
-            const fileList = Array.from(data.files);
-            for (const file of fileList) {
-                const fileExt = file.name.split('.').pop();
-                const filePath = `${tenantId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-                const { error: uploadError } = await supabase.storage
-                    .from('work_order_attachments')
-                    .upload(filePath, file);
+        const id = generateId();
+        const orderNumber = allOrders.length > 0
+            ? Math.max(...allOrders.map(o => o.orderNumber)) + 1
+            : 1;
 
-                if (!uploadError) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('work_order_attachments')
-                        .getPublicUrl(filePath);
-                    attachments.push({ url: publicUrl, name: file.name });
-                } else {
-                    console.error('useWorkOrders: File upload error:', uploadError);
-                }
-            }
-        }
+        try {
+            const row = await fetchApi<Record<string, unknown>>('/orders', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id,
+                    order_number: orderNumber,
+                    tenant_id: tenantId,
+                    created_by: profile.id,
+                    titulo: data.titulo,
+                    descripcion: data.descripcion,
+                    prioridad: data.prioridad,
+                    ubicacion: data.ubicacion,
+                    categoria: data.categoria,
+                    asignado_a: data.asignadoA,
+                    estado: 'pendiente',
+                    fecha_programada: data.fechaProgramada || null,
+                    attachments: JSON.stringify(attachments),
+                }),
+            });
 
-        console.log('useWorkOrders: Inserting to DB...');
-        const { data: row, error: insertError } = await supabase
-            .from('work_orders')
-            .insert({
-                tenant_id: tenantId, created_by: profile.id,
-                titulo: data.titulo, descripcion: data.descripcion,
-                prioridad: data.prioridad, ubicacion: data.ubicacion,
-                categoria: data.categoria, asignado_a: data.asignadoA,
-                estado: 'pendiente' as WoStatus,
-                fecha_programada: data.fechaProgramada || null,
-                attachments: attachments,
-            })
-            .select()
-            .single();
-
-        if (insertError) {
-            console.error('useWorkOrders: Insert error:', insertError);
+            const newOrder = dbToLocal(row);
+            setAllOrders((prev) => [newOrder, ...prev]);
+            void showLocalNotification("BuildCare – Nueva Orden", `📋 #${newOrder.orderNumber} ${newOrder.titulo}`);
+            return newOrder;
+        } catch (err) {
+            console.error('useWorkOrders: createOrder error:', err);
             return null;
         }
-        if (!row) {
-            console.warn('useWorkOrders: No row returned after insert');
-            return null;
-        }
-
-        const newOrder = dbToLocal(row as Record<string, unknown>);
-        console.log('useWorkOrders: Success! New order:', newOrder);
-
-        setAllOrders((prev) => [newOrder, ...prev]);
-
-        void writeHistory(newOrder.id, tenantId, profile.id, profile.full_name ?? undefined, 'created', {
-            newStatus: 'pendiente',
-            note: `Orden #${newOrder.orderNumber} creada`,
-        });
-        return newOrder;
-    }, [tenantId, profile?.id, profile?.full_name]);
+    }, [tenantId, profile?.id, allOrders]);
 
     const changeStatus = useCallback(async (id: string, estado: Status, note?: string) => {
+        const current = allOrders.find((o) => o.id === id);
         // Optimistic update
         setAllOrders((prev) =>
             prev.map((o) => o.id === id ? {
@@ -202,50 +133,25 @@ export function useWorkOrders() {
                 actualizadoEn: new Date().toISOString()
             } : o)
         );
-        const current = allOrders.find((o) => o.id === id);
 
-        const updates: any = { estado: estado as WoStatus };
-        if (note) updates.observaciones = note;
-
-        await supabase.from('work_orders').update(updates).eq('id', id);
-
-        // History
-        if (tenantId && current) {
-            void writeHistory(id, tenantId, profile?.id, profile?.full_name ?? undefined, 'status_changed', {
-                oldStatus: current.estado,
-                newStatus: estado,
-                note: note
+        try {
+            await fetchApi(`/orders/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ estado, ...(note ? { observaciones: note } : {}) }),
             });
+        } catch (err) {
+            console.error('useWorkOrders: changeStatus error:', err);
+            // Revert optimistic update
+            if (current) {
+                setAllOrders((prev) => prev.map((o) => o.id === id ? current : o));
+            }
         }
-    }, [allOrders, tenantId, profile?.id, profile?.full_name]);
+    }, [allOrders]);
 
     const updateOrder = useCallback(async (id: string, changes: Partial<WorkOrder> & { files?: FileList | File[] }) => {
         const currentOrder = allOrders.find(o => o.id === id);
-        const justUploaded: { url: string; name: string }[] = [];
-
-        if (changes.files && changes.files.length > 0) {
-            const fileList = Array.from(changes.files);
-            for (const file of fileList) {
-                const fileExt = file.name.split('.').pop();
-                const filePath = `${tenantId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-                const { error: uploadError } = await supabase.storage
-                    .from('work_order_attachments')
-                    .upload(filePath, file);
-
-                if (!uploadError) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('work_order_attachments')
-                        .getPublicUrl(filePath);
-                    justUploaded.push({ url: publicUrl, name: file.name });
-                } else {
-                    console.error('Error uploading file in updateOrder:', uploadError);
-                }
-            }
-        }
-
-        // Combine surviving existing attachments with the ones just uploaded
         const survivors = (changes as any).attachments || (currentOrder ? currentOrder.attachments : []);
-        const finalAttachments = [...survivors, ...justUploaded];
+        const finalAttachments = [...survivors];
 
         // Optimistic update
         setAllOrders((prev) =>
@@ -266,58 +172,58 @@ export function useWorkOrders() {
         if (changes.asignadoA !== undefined) dbChanges.asignado_a = changes.asignadoA;
         if (changes.fechaProgramada !== undefined) dbChanges.fecha_programada = changes.fechaProgramada;
         if (changes.estado !== undefined) dbChanges.estado = changes.estado;
-        dbChanges.attachments = finalAttachments;
+        dbChanges.attachments = JSON.stringify(finalAttachments);
 
-        if (Object.keys(dbChanges).length === 0) return;
-        const { error: updateError } = await supabase.from('work_orders').update(dbChanges).eq('id', id);
-        if (updateError) {
-            console.error('Error updating work order in DB:', updateError);
+        try {
+            await fetchApi(`/orders/${id}`, { method: 'PUT', body: JSON.stringify(dbChanges) });
+        } catch (err) {
+            console.error('useWorkOrders: updateOrder error:', err);
         }
-
-        if (tenantId) {
-            void writeHistory(id, tenantId, profile?.id, profile?.full_name ?? undefined, 'updated');
-        }
-    }, [tenantId, profile?.id, profile?.full_name]);
+    }, [allOrders]);
 
     const deleteOrder = useCallback(async (id: string) => {
         setAllOrders((prev) =>
             prev.map((o) => o.id === id ? { ...o, estado: 'eliminada' as const, eliminadoEn: new Date().toISOString() } : o)
         );
-        await supabase.from('work_orders')
-            .update({ deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
-        if (tenantId) {
-            void writeHistory(id, tenantId, profile?.id, profile?.full_name ?? undefined, 'deleted');
+        try {
+            await fetchApi(`/orders/${id}`, { method: 'PUT', body: JSON.stringify({ deleted: true, deleted_at: new Date().toISOString() }) });
+        } catch (err) {
+            console.error('useWorkOrders: deleteOrder error:', err);
         }
-    }, [tenantId, profile?.id, profile?.full_name]);
+    }, []);
 
     const restoreOrder = useCallback(async (id: string) => {
         setAllOrders((prev) =>
             prev.map((o) => o.id === id ? { ...o, estado: 'pendiente' as Status, eliminadoEn: undefined } : o)
         );
-        await supabase.from('work_orders')
-            .update({ deleted: false, deleted_at: null }).eq('id', id);
-        if (tenantId) {
-            void writeHistory(id, tenantId, profile?.id, profile?.full_name ?? undefined, 'restored');
+        try {
+            await fetchApi(`/orders/${id}`, { method: 'PUT', body: JSON.stringify({ deleted: false, deleted_at: null, estado: 'pendiente' }) });
+        } catch (err) {
+            console.error('useWorkOrders: restoreOrder error:', err);
         }
-    }, [tenantId, profile?.id, profile?.full_name]);
+    }, []);
 
     const permanentDelete = useCallback(async (id: string) => {
         setAllOrders((prev) => prev.filter((o) => o.id !== id));
-        await supabase.from('work_orders').delete().eq('id', id);
+        try {
+            await fetchApi(`/orders/${id}`, { method: 'DELETE' });
+        } catch (err) {
+            console.error('useWorkOrders: permanentDelete error:', err);
+        }
     }, []);
 
     // ── History query ─────────────────────────────────────────
-    const loadHistory = useCallback(async (workOrderId?: string) => {
+    const loadHistory = useCallback(async (workOrderId?: string): Promise<WorkOrderHistory[]> => {
         if (!tenantId) return [];
-        let q = supabase
-            .from('work_order_history')
-            .select('*')
-            .eq('tenant_id', tenantId)
-            .order('created_at', { ascending: false })
-            .limit(100);
-        if (workOrderId) q = q.eq('work_order_id', workOrderId);
-        const { data } = await q;
-        return (data ?? []) as WorkOrderHistory[];
+        try {
+            const url = workOrderId
+                ? `/history?tenant_id=${tenantId}&work_order_id=${workOrderId}`
+                : `/history?tenant_id=${tenantId}`;
+            return await fetchApi<WorkOrderHistory[]>(url);
+        } catch (err) {
+            console.error('useWorkOrders: loadHistory error:', err);
+            return [];
+        }
     }, [tenantId]);
 
     return {
