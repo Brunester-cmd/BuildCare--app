@@ -1,4 +1,4 @@
-name = "sgo-backend"
+name = "buildcare-backend"
 main = "worker/index.ts"
 compatibility_date = "2024-03-04"
 
@@ -12,9 +12,8 @@ enabled = true
 
 [[d1_databases]]
 binding = "DB"
-# We will create this database in a moment and add the ID here
-database_name = "sgo-db"
-database_id = "5ade44db-689f-411b-b579-8e0401396b27"
+database_name = "buildcare-db-prod"
+database_id = "0e624b61-d7c4-43af-8901-27cdca70d768"
 
 [vars]
 # Any environment variables can go here

@@ -22,7 +22,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const mockUser = { id: 'mock-user-id', email: 'admin@sgo.local' };
+    const mockUser = { id: 'mock-user-id', email: 'admin@buildcare.local' };
 
     const mockProfile: Profile = {
         id: 'mock-user-id',
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         avatar_url: null,
         push_subscription: null,
         push_enabled: false,
-        email: 'admin@sgo.local',
+        email: 'admin@buildcare.local',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     };

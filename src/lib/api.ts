@@ -1,4 +1,5 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787/api';
+const isDev = import.meta.env.DEV;
+export const API_URL = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:8787/api' : '/api');
 
 /**
  * Basic generic fetch wrapper to communicate with the Cloudflare Worker API
