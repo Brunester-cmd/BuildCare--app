@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
-    const [theme, setThemeState] = useState<Theme>('light');
+    const [theme, setThemeState] = useState<Theme>('dark');
 
     useEffect(() => {
         // Handle auth state changes
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (profileData) {
                 setProfile(profileData);
-                setThemeState((profileData.theme as Theme) || 'light');
+                setThemeState((profileData.theme as Theme) || 'dark');
 
                 if (profileData.tenant_id) {
                     const { data: tenantData, error: tenantError } = await supabase

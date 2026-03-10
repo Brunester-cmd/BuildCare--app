@@ -55,7 +55,7 @@ export default function Dashboard({ searchQuery }: DashboardProps) {
 
     useState(() => {
         async function fetchMembers() {
-            const tenantId = tenant?.id || profile?.tenant_id;
+            const tenantId = tenant?.id || profile?.tenant_id || '00000000-0000-0000-0000-000000000000';
             if (!tenantId) return;
             try {
                 const data = await fetchApi<any[]>(`/profiles?tenant_id=${tenantId}&status=active`);

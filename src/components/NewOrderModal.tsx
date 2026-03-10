@@ -73,7 +73,7 @@ export default function NewOrderModal({ onClose, onCreate, initialDate, members 
         e.preventDefault();
         if (!form.titulo.trim()) { setTitleError(t.required_title); return; }
 
-        const tenantId = tenant?.id || profile?.tenant_id;
+        const tenantId = tenant?.id || profile?.tenant_id || '00000000-0000-0000-0000-000000000000';
         if (!tenantId) {
             setSubmitError(t.error_missing_tenant);
             return;

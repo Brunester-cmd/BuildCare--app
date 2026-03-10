@@ -54,12 +54,12 @@ export function useWorkOrders() {
 
     // ── Load all orders from Supabase ───────────────────────
     const loadOrders = useCallback(async () => {
-        if (!tenantId) { setLoading(false); return; }
+        const effectiveTenantId = tenantId || '00000000-0000-0000-0000-000000000000';
         try {
             const { data, error } = await supabase
                 .from('work_orders')
                 .select('*')
-                .eq('tenant_id', tenantId)
+                .eq('tenant_id', effectiveTenantId)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -83,7 +83,8 @@ export function useWorkOrders() {
 
     // ── CRUD ─────────────────────────────────────────────────
     const createOrder = useCallback(async (data: NewOrderData): Promise<WorkOrder | null> => {
-        if (!tenantId || !profile?.id) return null;
+        const effectiveTenantId = tenantId || '00000000-0000-0000-0000-000000000000';
+        const effectiveProfileId = profile?.id || null;
 
         const attachments: { url: string; name: string }[] = [];
         // TODO: implement file uploads to Supabase Storage if needed
@@ -92,8 +93,8 @@ export function useWorkOrders() {
             const { data: newRow, error } = await supabase
                 .from('work_orders')
                 .insert([{
-                    tenant_id: tenantId,
-                    created_by: profile.id,
+                    tenant_id: effectiveTenantId,
+                    created_by: effectiveProfileId,
                     titulo: data.titulo,
                     descripcion: data.descripcion,
                     prioridad: data.prioridad,
@@ -235,12 +236,12 @@ export function useWorkOrders() {
     }, []);
 
     const loadHistory = useCallback(async (workOrderId?: string): Promise<WorkOrderHistory[]> => {
-        if (!tenantId) return [];
+        const effectiveTenantId = tenantId || '00000000-0000-0000-0000-000000000000';
         try {
             let query = supabase
                 .from('work_order_history')
                 .select('*')
-                .eq('tenant_id', tenantId)
+                .eq('tenant_id', effectiveTenantId)
                 .order('created_at', { ascending: false });
 
             if (workOrderId) {
