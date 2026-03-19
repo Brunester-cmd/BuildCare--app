@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, PauseCircle, CheckCircle2, Plus, List, Inbox, SearchX, X, Filter, ChevronDown, CalendarDays } from 'lucide-react';
-import { fetchApi } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkOrders } from '../hooks/useWorkOrders';
 import { type WorkOrder, type Status, type Profile, type Priority } from '../types';
@@ -58,8 +58,12 @@ export default function Dashboard({ searchQuery }: DashboardProps) {
             const tenantId = tenant?.id || profile?.tenant_id || '00000000-0000-0000-0000-000000000000';
             if (!tenantId) return;
             try {
-                const data = await fetchApi<any[]>(`/profiles?tenant_id=${tenantId}&status=active`);
-                setMembers(data);
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('tenant_id', tenantId)
+                    .eq('status', 'active');
+                if (data) setMembers(data);
             } catch {
                 // Members will be empty — non-critical
             }

@@ -3,7 +3,8 @@ import {
     X, MapPin, User, Tag, Calendar, Clock, Save, Trash2,
     Play, Pause, CheckCircle, Paperclip, FileText,
 } from 'lucide-react';
-import { fetchApi } from '../lib/api';
+
+import { supabase } from '../lib/supabase';
 import DateInput from './DateInput';
 import { type WorkOrder, type Status, type Priority, type Category, PRIORITY_COLORS, CATEGORY_LABELS, type Profile } from '../types';
 import { useI18n } from '../hooks/useI18n';
@@ -70,8 +71,12 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
             if (!order.tenant_id) return;
             setMembersLoading(true);
             try {
-                const data = await fetchApi<Profile[]>(`/profiles?tenant_id=${order.tenant_id}&status=active`);
-                setMembers(data);
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('tenant_id', order.tenant_id)
+                    .eq('status', 'active');
+                if (data) setMembers(data);
             } catch (err) {
                 console.error('Error fetching members:', err);
             } finally {
