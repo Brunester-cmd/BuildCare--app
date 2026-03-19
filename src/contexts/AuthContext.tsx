@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
-    const [theme, setThemeState] = useState<Theme>('dark');
+    const [theme, setThemeState] = useState<Theme>(() => (localStorage.getItem('app-theme') as Theme) || 'azurite');
 
     useEffect(() => {
         // Handle auth state changes
@@ -69,7 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (profileData) {
                 setProfile(profileData);
-                setThemeState((profileData.theme as Theme) || 'dark');
+                const userTheme = (profileData.theme as Theme) || 'azurite';
+                setThemeState(userTheme);
+                localStorage.setItem('app-theme', userTheme);
 
                 if (profileData.tenant_id) {
                     const { data: tenantData, error: tenantError } = await supabase
@@ -129,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function setTheme(newTheme: Theme) {
         setThemeState(newTheme);
+        localStorage.setItem('app-theme', newTheme);
         if (user?.id) {
             await supabase
                 .from('profiles')
