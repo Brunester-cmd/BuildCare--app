@@ -356,8 +356,9 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
 
             {isSuperAdmin && (
                 <div className="header-center" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-                    <Link to="/admin" className="header-admin-link">
-                        Panel de administrador
+                    <Link to="/admin" className="header-admin-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'var(--primary)', color: 'white', borderRadius: '2rem', textDecoration: 'none', fontWeight: 500, boxShadow: '0 4px 10px rgba(var(--primary-rgb, 59, 130, 246), 0.3)' }}>
+                        <Lock size={16} />
+                        Administrador
                     </Link>
                 </div>
             )}

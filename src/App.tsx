@@ -3,11 +3,10 @@ import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
-import ResetPassword from './pages/ResetPassword';
 import RecycleBin from './pages/RecycleBin';
 import AdminPanel from './pages/AdminPanel';
 import DayOrdersPage from './pages/DayOrdersPage';
+import Login from './pages/Login';
 import HistoryPanel from './components/HistoryPanel';
 import { useWorkOrders } from './hooks/useWorkOrders';
 import { Download } from 'lucide-react';
@@ -59,12 +58,11 @@ function AppContent() {
   if (!session) {
     return (
       <Routes>
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="*" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
-
   return (
     <div className="app-shell">
       <Header

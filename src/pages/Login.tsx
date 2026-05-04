@@ -1,143 +1,191 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, LogIn, Download } from 'lucide-react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useI18n } from '../hooks/useI18n';
-import { useInstallPrompt } from '../hooks/useInstallPrompt';
+import { LogIn, KeyRound, Mail, AlertCircle } from 'lucide-react';
 
 export default function Login() {
-    const { signIn } = useAuth();
-    const { t } = useI18n();
-    const { canInstall, promptInstall } = useInstallPrompt();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/';
+  const { signIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
-    const [showPass, setShowPass] = useState(false);
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
 
-    useEffect(() => {
-        const savedEmail = localStorage.getItem('rememberedEmail');
-        if (savedEmail) {
-            setEmail(savedEmail);
-            setRememberMe(true);
-        }
-    }, []);
-
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
-        const { error: err } = await signIn(email, password);
-        setLoading(false);
-        if (err) {
-            setError(t.login_error);
-        } else {
-            if (rememberMe) {
-                localStorage.setItem('rememberedEmail', email);
-            } else {
-                localStorage.removeItem('rememberedEmail');
-            }
-            navigate(from, { replace: true });
-        }
+    try {
+      const { error: signInError } = await signIn(email, password);
+      if (signInError) {
+        setError('Credenciales inválidas. Por favor intenta de nuevo.');
+      }
+    } catch (err) {
+      setError('Ocurrió un error inesperado al iniciar sesión.');
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    return (
-        <div className="auth-screen">
-            <div className="auth-card">
-                {/* Branding */}
-                <div className="auth-logo">
-                    <div>
-                        <h1 className="auth-app-name">BuildCare</h1>
-                        <p className="auth-app-sub">{t.app_subtitle}</p>
-                    </div>
-                </div>
-
-                <h2 className="auth-title">{t.login_title}</h2>
-                <p className="auth-subtitle">{t.login_subtitle}</p>
-
-                <form onSubmit={handleSubmit} className="auth-form">
-                    {error && <div className="auth-error">{error}</div>}
-
-                    <div className="form-group">
-                        <label className="form-label">{t.email_label}</label>
-                        <div className="input-icon-wrap">
-                            <Mail size={16} className="input-icon" />
-                            <input
-                                type="email"
-                                className="form-input form-input--icon"
-                                placeholder={t.email_placeholder}
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                autoComplete="email"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">{t.password_label}</label>
-                        <div className="input-icon-wrap">
-                            <Lock size={16} className="input-icon" />
-                            <input
-                                type={showPass ? 'text' : 'password'}
-                                className="form-input form-input--icon form-input--icon-right"
-                                placeholder={t.password_placeholder}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                autoComplete="current-password"
-                            />
-                            <button type="button" className="input-icon-right" onClick={() => setShowPass(!showPass)}>
-                                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </button>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                            <label className="auth-remember-me" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--slate-500)', cursor: 'pointer' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                    style={{ accentColor: 'var(--amber-500)' }}
-                                />
-                                {(t as any).remember_me || 'Recordar usuario'}
-                            </label>
-                            <Link to="/forgot-password" className="auth-link auth-link--sm">
-                                {t.forgot_password_link}
-                            </Link>
-                        </div>
-                    </div>
-
-                    <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-                        {loading ? (
-                            <span className="btn-spinner" />
-                        ) : (
-                            <><LogIn size={17} /> {t.login_button}</>
-                        )}
-                    </button>
-                </form>
-
-                <p className="auth-footer-text">
-                    {t.no_account}{' '}
-                    <Link to="/register" className="auth-link">{t.request_access}</Link>
-                </p>
-            </div>
-
-            <p className="auth-copyright">{t.copyright}</p>
-
-            {canInstall && (
-                <button
-                    onClick={promptInstall}
-                    className="install-app-btn"
-                >
-                    <Download size={15} />
-                    {(t as any).install_app || 'Instalar app'}
-                </button>
-            )}
+  return (
+    <div className="login-container" style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '100vh', 
+      width: '100%',
+      backgroundColor: 'var(--surface)',
+      color: 'var(--text-primary)'
+    }}>
+      <div className="login-card" style={{
+        padding: '2.5rem',
+        backgroundColor: 'var(--surface-sunken)',
+        borderRadius: '1rem',
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+        width: '100%',
+        maxWidth: '400px',
+        border: '1px solid var(--border)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: '64px', 
+            height: '64px', 
+            borderRadius: '50%', 
+            backgroundColor: 'var(--primary)',
+            color: 'white',
+            marginBottom: '1rem'
+          }}>
+            <LogIn size={32} />
+          </div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>BuildCare</h1>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '0.875rem' }}>
+            Inicia sesión para continuar
+          </p>
         </div>
-    );
+
+        {error && (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            padding: '0.75rem', 
+            backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            borderRadius: '0.5rem', 
+            color: '#ef4444', 
+            marginBottom: '1.5rem',
+            fontSize: '0.875rem'
+          }}>
+            <AlertCircle size={16} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div>
+            <label htmlFor="email" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>
+              Correo electrónico
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', inset: '0 0 0 0.75rem', display: 'flex', alignItems: 'center', pointerEvents: 'none', color: 'var(--text-secondary)' }}>
+                <Mail size={18} />
+              </div>
+              <input
+                id="email"
+                type="email"
+                required
+                placeholder="tu@correo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem 0.75rem 2.5rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--surface)',
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                className="focus-ring"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>
+              Contraseña
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', inset: '0 0 0 0.75rem', display: 'flex', alignItems: 'center', pointerEvents: 'none', color: 'var(--text-secondary)' }}>
+                <KeyRound size={18} />
+              </div>
+              <input
+                id="password"
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem 0.75rem 2.5rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--surface)',
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                className="focus-ring"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              marginTop: '0.5rem',
+              width: '100%',
+              padding: '0.875rem',
+              borderRadius: '0.5rem',
+              backgroundColor: 'var(--primary)',
+              color: 'white',
+              fontWeight: 500,
+              border: 'none',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.7 : 1,
+              transition: 'all 0.2s',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {isLoading ? (
+               <div style={{ 
+                 height: '1.25rem', 
+                 width: '1.25rem', 
+                 border: '2px solid rgba(255,255,255,0.3)', 
+                 borderTopColor: 'white', 
+                 borderRadius: '50%',
+                 animation: 'spin 1s linear infinite'
+               }} />
+            ) : "Ingresar"}
+          </button>
+        </form>
+      </div>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .focus-ring:focus {
+          border-color: var(--primary) !important;
+          box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 59, 130, 246), 0.2) !important;
+        }
+      `}</style>
+    </div>
+  );
 }

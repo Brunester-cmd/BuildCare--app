@@ -4,7 +4,7 @@ import { ClipboardList, PauseCircle, CheckCircle2, Plus, List, Inbox, SearchX, X
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkOrders } from '../hooks/useWorkOrders';
-import { type WorkOrder, type Status, type Profile, type Priority } from '../types';
+import { type WorkOrder, type Status, type Priority } from '../types';
 import StatusCard from '../components/StatusCard';
 import WorkOrderRow from '../components/WorkOrderRow';
 import NewOrderModal from '../components/NewOrderModal';
@@ -28,7 +28,7 @@ export default function Dashboard({ searchQuery }: DashboardProps) {
         createOrder, updateOrder, changeStatus, deleteOrder,
     } = useWorkOrders();
     const navigate = useNavigate();
-    const { profile, tenant } = useAuth();
+    const { tenant } = useAuth();
     const { t } = useI18n();
     const [filter, setFilter] = useState<ActiveFilter>('pendiente');
     const [view, setView] = useState<'grid' | 'list' | 'calendar'>('grid');
@@ -50,26 +50,9 @@ export default function Dashboard({ searchQuery }: DashboardProps) {
         }
     }, [isMenuOpen]);
 
-    const [members, setMembers] = useState<Profile[]>([]);
     const [scheduleDate, setScheduleDate] = useState<Date | undefined>(undefined);
 
-    useState(() => {
-        async function fetchMembers() {
-            const tenantId = tenant?.id || profile?.tenant_id || '00000000-0000-0000-0000-000000000000';
-            if (!tenantId) return;
-            try {
-                const { data } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('tenant_id', tenantId)
-                    .eq('status', 'active');
-                if (data) setMembers(data);
-            } catch {
-                // Members will be empty — non-critical
-            }
-        }
-        void fetchMembers();
-    });
+    const assignees = Array.from(new Set(allOrders.map(o => o.asignadoA).filter(Boolean))).sort();
 
     const baseOrders: WorkOrder[] =
         filter === 'pendiente' ? pendientes :
@@ -335,15 +318,14 @@ export default function Dashboard({ searchQuery }: DashboardProps) {
                                             >
                                                 {(t as any).all_assignees || 'Todos los operarios'}
                                             </button>
-                                            {members.map(m => {
-                                                const name = m.full_name || m.email || '';
+                                            {assignees.map(name => {
                                                 return (
                                                     <button
-                                                        key={m.id}
+                                                        key={name}
                                                         className={`filter-option ${assigneeFilter === name ? 'active' : ''}`}
                                                         onClick={() => setAssigneeFilter(name)}
                                                     >
-                                                        {m.full_name || m.email}
+                                                        {name}
                                                     </button>
                                                 );
                                             })}
@@ -406,7 +388,7 @@ export default function Dashboard({ searchQuery }: DashboardProps) {
                     initialDate={scheduleDate}
                     onClose={() => { setShowNewModal(false); setScheduleDate(undefined); }}
                     onCreate={createOrder}
-                    members={members}
+                    assignees={assignees}
                 />
             )}
 

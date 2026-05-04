@@ -1,6 +1,4 @@
 // Database types matching Supabase schema
-export type UserRole = 'super_admin' | 'admin' | 'user';
-export type UserStatus = 'pending' | 'active' | 'suspended';
 export type WoStatus = 'pendiente' | 'en-pausa' | 'completada';
 export type WoPriority = 'baja' | 'media' | 'alta' | 'urgente';
 export type WoCategory =
@@ -22,22 +20,7 @@ export interface Tenant {
   created_at: string;
 }
 
-export interface Profile {
-  id: string;
-  tenant_id: string | null;
-  full_name: string | null;
-  avatar_url: string | null;
-  role: UserRole;
-  status: UserStatus;
-  push_subscription: object | null;
-  push_enabled: boolean;
-  language: string;
-  theme?: string;
-  company_name: string | null;
-  email?: string;
-  created_at: string;
-  updated_at: string;
-}
+
 
 export interface WorkOrderDB {
   id: string;

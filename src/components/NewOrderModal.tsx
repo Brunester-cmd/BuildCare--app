@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Save, Paperclip, FileText, User } from 'lucide-react';
 import type { NewOrderData } from '../hooks/useWorkOrders';
-import { type Priority, type Category, CATEGORY_LABELS, type Profile } from '../types';
+import { type Priority, type Category, CATEGORY_LABELS } from '../types';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../contexts/AuthContext';
 import DateInput from './DateInput';
@@ -10,20 +10,18 @@ interface NewOrderModalProps {
     onClose: () => void;
     onCreate: (data: NewOrderData) => Promise<unknown>;
     initialDate?: Date;
-    members?: Profile[];
+    assignees?: string[];
 }
 
 const PRIORITIES: Priority[] = ['baja', 'media', 'alta', 'urgente'];
 const CATEGORIES = Object.keys(CATEGORY_LABELS) as Category[];
 
-export default function NewOrderModal({ onClose, onCreate, initialDate, members = [] }: NewOrderModalProps) {
+export default function NewOrderModal({ onClose, onCreate, initialDate, assignees = [] }: NewOrderModalProps) {
     const { t } = useI18n();
-    const { profile, tenant, refreshProfile } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         console.log('NewOrderModal: mounted. initialDate:', initialDate);
-        void refreshProfile();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -73,12 +71,6 @@ export default function NewOrderModal({ onClose, onCreate, initialDate, members 
         e.preventDefault();
         if (!form.titulo.trim()) { setTitleError(t.required_title); return; }
 
-        const tenantId = tenant?.id || profile?.tenant_id || '00000000-0000-0000-0000-000000000000';
-        if (!tenantId) {
-            setSubmitError(t.error_missing_tenant);
-            return;
-        }
-
         setSaving(true);
         console.log('Attempting to create order with data:', form);
         try {
@@ -90,9 +82,9 @@ export default function NewOrderModal({ onClose, onCreate, initialDate, members 
                 return;
             }
             onClose();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error creating order:', err);
-            setSubmitError(t.error_creating_order || 'Error al crear la orden.');
+            setSubmitError(`Error: ${err.message || t.error_creating_order || 'Error al crear la orden.'}`);
         } finally {
             setSaving(false);
         }
@@ -177,50 +169,20 @@ export default function NewOrderModal({ onClose, onCreate, initialDate, members 
                         <label className="form-label">{t.assigned_to}</label>
                         <div className="input-icon-wrap" style={{ marginBottom: '0.5rem' }}>
                             <User size={16} className="input-icon" />
-                            <select
-                                className="form-input form-input--icon form-select"
-                                value={""}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (!val) return;
-                                    const current = form.asignadoA ? form.asignadoA.split(', ').filter(Boolean) : [];
-                                    if (!current.includes(val)) {
-                                        set('asignadoA', [...current, val].join(', '));
-                                    }
-                                }}
-                                disabled={false}
-                            >
-                                <option value="">{t.select_assignee || 'Seleccionar operario'}</option>
-                                {members.map((m) => {
-                                    const name = m.full_name || m.email;
-                                    return (
-                                        <option key={m.id} value={name}>
-                                            {name}
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                        </div>
-                        {form.asignadoA && (
-                            <div className="edit-attachments-list">
-                                {form.asignadoA.split(', ').filter(Boolean).map((assignee, i) => (
-                                    <div key={i} className="selected-file-badge" style={{ marginBottom: '0.4rem', background: 'var(--slate-100)', color: 'var(--slate-700)', borderColor: 'var(--slate-200)' }}>
-                                        <User size={14} />
-                                        <span className="file-name-text">{assignee}</span>
-                                        <button
-                                            type="button"
-                                            className="file-remove-btn"
-                                            onClick={() => {
-                                                const current = form.asignadoA!.split(', ').filter(Boolean);
-                                                set('asignadoA', current.filter(a => a !== assignee).join(', '));
-                                            }}
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                    </div>
+                            <input
+                                list="assignees-list"
+                                className="form-input form-input--icon"
+                                placeholder={t.select_assignee || 'Nombre del operario o equipo...'}
+                                value={form.asignadoA}
+                                onChange={(e) => set('asignadoA', e.target.value)}
+                            />
+                            <datalist id="assignees-list">
+                                {assignees.map((name) => (
+                                    <option key={name} value={name} />
                                 ))}
-                            </div>
-                        )}
+                            </datalist>
+                        </div>
+
                     </div>
 
                     <div className="form-group">

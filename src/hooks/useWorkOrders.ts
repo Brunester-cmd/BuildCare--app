@@ -46,11 +46,11 @@ function dbToWorkOrder(row: any): WorkOrder {
 }
 
 export function useWorkOrders() {
-    const { profile, tenant } = useAuth();
+    const { user, tenant } = useAuth();
     const [allOrders, setAllOrders] = useState<WorkOrder[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const tenantId = tenant?.id ?? profile?.tenant_id;
+    const tenantId = tenant?.id ?? '00000000-0000-0000-0000-000000000000';
 
     // ── Load all orders from Supabase ───────────────────────
     const loadOrders = useCallback(async () => {
@@ -84,7 +84,7 @@ export function useWorkOrders() {
     // ── CRUD ─────────────────────────────────────────────────
     const createOrder = useCallback(async (data: NewOrderData): Promise<WorkOrder | null> => {
         const effectiveTenantId = tenantId || '00000000-0000-0000-0000-000000000000';
-        const effectiveProfileId = profile?.id || null;
+        const effectiveUserId = user?.id || null;
 
         const attachments: { url: string; name: string }[] = [];
         // TODO: implement file uploads to Supabase Storage if needed
@@ -94,7 +94,7 @@ export function useWorkOrders() {
                 .from('work_orders')
                 .insert([{
                     tenant_id: effectiveTenantId,
-                    created_by: effectiveProfileId,
+                    created_by: effectiveUserId,
                     titulo: data.titulo,
                     descripcion: data.descripcion,
                     prioridad: data.prioridad,
@@ -114,11 +114,11 @@ export function useWorkOrders() {
             setAllOrders((prev) => [newOrder, ...prev]);
             void showLocalNotification("BuildCare – Nueva Orden", `📋 #${newOrder.orderNumber} ${newOrder.titulo}`);
             return newOrder;
-        } catch (err) {
+        } catch (err: any) {
             console.error('useWorkOrders: createOrder error:', err);
-            return null;
+            throw err;
         }
-    }, [tenantId, profile?.id]);
+    }, [tenantId, user?.id]);
 
     const changeStatus = useCallback(async (id: string, estado: Status, note?: string) => {
         const current = allOrders.find((o) => o.id === id);
