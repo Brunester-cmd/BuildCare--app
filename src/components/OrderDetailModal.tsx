@@ -6,6 +6,7 @@ import {
 
 import { supabase } from '../lib/supabase';
 import DateInput from './DateInput';
+import AIHelpPanel from './AIHelpPanel';
 import { type WorkOrder, type Status, type Priority, type Category, PRIORITY_COLORS, CATEGORY_LABELS, type Profile } from '../types';
 import { useI18n } from '../hooks/useI18n';
 
@@ -442,6 +443,9 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                     </div>
                                 )}
                             </div>
+
+                            {/* AI Help Panel */}
+                            <AIHelpPanel order={order} />
                         </>
                     )}
 

@@ -77,8 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('app-theme', newTheme);
     }
 
-    const isSuperAdmin = true;
-    const isAdmin = true;
+    const isSuperAdmin = user?.email === 'brunogst92@gmail.com';
+    const isAdmin = user?.email === 'brunogst92@gmail.com';
     const isActive = true;
 
     return (
