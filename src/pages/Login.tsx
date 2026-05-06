@@ -380,7 +380,7 @@ export default function Login() {
           width: 100%;
           padding: 1.125rem 1.25rem 1.125rem 3.5rem;
           border-radius: 1rem;
-          border: 1px solid var(--slate-200);
+          border: 1px solid var(--slate-300);
           background: white;
           color: var(--slate-900);
           font-size: 1rem;
@@ -394,8 +394,13 @@ export default function Login() {
           box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1), 0 10px 15px -3px rgba(0,0,0,0.05);
         }
 
+        .input-with-icon input::placeholder {
+          color: var(--slate-600);
+          opacity: 1;
+        }
+
         .input-with-icon input:focus + .field-icon {
-          color: var(--amber-500);
+          color: var(--amber-600);
         }
 
         .form-options {
@@ -415,7 +420,7 @@ export default function Login() {
         }
 
         .remember-me input {
-          accent-color: var(--amber-500);
+          accent-color: var(--amber-600);
         }
 
         .forgot-password {
@@ -429,7 +434,7 @@ export default function Login() {
         }
 
         .forgot-password:hover {
-          color: var(--amber-600);
+          color: var(--amber-700);
         }
 
         .premium-submit-btn {
@@ -437,7 +442,7 @@ export default function Login() {
           width: 100%;
           padding: 1.125rem;
           border-radius: 1rem;
-          background: var(--slate-900);
+          background: var(--amber-600);
           color: white;
           font-weight: 700;
           font-size: 1.1rem;
@@ -447,13 +452,13 @@ export default function Login() {
           display: flex;
           justify-content: center;
           align-items: center;
-          box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.3);
+          box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
         }
 
         .premium-submit-btn:hover:not(:disabled) {
-          background: black;
+          background: var(--amber-700);
           transform: translateY(-2px);
-          box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.4);
+          box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.5);
         }
 
         .premium-submit-btn:active {
