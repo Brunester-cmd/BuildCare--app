@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, KeyRound, Mail, AlertCircle } from 'lucide-react';
+import { LogIn, KeyRound, Mail, AlertCircle, Check, UserCircle } from 'lucide-react';
 
 export default function Login() {
   const { signIn, signUp } = useAuth();
