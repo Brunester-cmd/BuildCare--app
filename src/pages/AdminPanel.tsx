@@ -54,14 +54,17 @@ export default function AdminPanel() {
 
     useEffect(() => { void load(); }, [load]);
 
+    const [selectedTenantForApproval, setSelectedTenantForApproval] = useState<Record<string, string>>({});
+
     async function approveUser(userId: string) {
         setLoading(true);
         try {
             const userProf = allUsers.find(u => u.id === userId);
             const companyName = userProf?.company_name?.trim();
-            let targetTenantId: string | null = null;
+            let targetTenantId: string | null = selectedTenantForApproval[userId] || null;
 
-            if (companyName) {
+            if (!targetTenantId) {
+                if (companyName) {
                 const existing = tenants.find(t => t.name.toLowerCase() === companyName.toLowerCase());
                 if (existing) {
                     targetTenantId = existing.id;
@@ -495,9 +498,26 @@ export default function AdminPanel() {
                                             <Trash2 size={13} /> {t.suspend_btn}
                                         </button>
                                     ) : (
-                                        <button className="btn btn-sm btn-success" onClick={() => approveUser(u.id)}>
-                                            <CheckCircle size={13} /> {t.activate}
-                                        </button>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <select
+                                                className="form-select form-select-sm"
+                                                style={{ padding: '0.2rem', fontSize: '0.75rem', borderRadius: '0.4rem', border: '1px solid var(--border)', backgroundColor: 'var(--surface)' }}
+                                                value={selectedTenantForApproval[u.id] || ''}
+                                                onChange={(e) => setSelectedTenantForApproval(prev => ({ ...prev, [u.id]: e.target.value }))}
+                                            >
+                                                <option value="">-- Seleccionar Empresa --</option>
+                                                {tenants.map(ten => (
+                                                    <option key={ten.id} value={ten.id}>{ten.name}</option>
+                                                ))}
+                                            </select>
+                                            <button 
+                                                className="btn btn-sm btn-success" 
+                                                onClick={() => approveUser(u.id)}
+                                                disabled={!selectedTenantForApproval[u.id] && !u.company_name}
+                                            >
+                                                <CheckCircle size={13} /> {t.activate}
+                                            </button>
+                                        </div>
                                     )}
                                     <button
                                         className="btn btn-ghost btn-sm"
