@@ -23,7 +23,7 @@ export default function App() {
 }
 
 function AppContent() {
-  const { session, isSuperAdmin, loading } = useAuth();
+  const { session, profile, isSuperAdmin, isActive, loading, signOut } = useAuth();
   const { loadHistory } = useWorkOrders();
   const [searchQuery, setSearchQuery] = useState('');
   const [showHistory, setShowHistory] = useState(false);
@@ -61,6 +61,42 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+    );
+  }
+
+  // Handle users that are not yet approved
+  if (!isActive && !isSuperAdmin) {
+    return (
+      <div className="app-shell" style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '100vh',
+        textAlign: 'center',
+        padding: '2rem',
+        backgroundColor: 'var(--surface)'
+      }}>
+        <div style={{ 
+            backgroundColor: 'var(--surface-sunken)', 
+            padding: '3rem', 
+            borderRadius: '1.5rem', 
+            maxWidth: '500px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+            border: '1px solid var(--border)'
+        }}>
+            <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>⏳</div>
+            <h1 style={{ fontSize: '1.75rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Cuenta en espera de aprobación</h1>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6' }}>
+                ¡Hola, <strong>{profile?.full_name || 'usuario'}</strong>! Tu cuenta ha sido registrada con éxito.
+                <br /><br />
+                Por razones de seguridad, un administrador debe revisar y aprobar tu acceso antes de que puedas utilizar el sistema. Te avisaremos cuando tu cuenta esté lista.
+            </p>
+            <button className="btn btn-ghost" onClick={() => signOut()}>
+                Cerrar Sesión
+            </button>
+        </div>
+      </div>
     );
   }
   return (
