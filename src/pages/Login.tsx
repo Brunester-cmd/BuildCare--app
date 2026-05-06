@@ -308,14 +308,14 @@ export default function Login() {
         .form-title {
           font-size: 2.5rem;
           font-weight: 900;
-          color: #000000;
+          color: #1a1a1a;
           letter-spacing: -0.04em;
           margin-bottom: 0.75rem;
           line-height: 1.1;
         }
 
         .form-subtitle {
-          color: var(--slate-500);
+          color: var(--slate-600);
           font-size: 1.05rem;
           line-height: 1.5;
         }
@@ -383,7 +383,7 @@ export default function Login() {
           border-radius: 1rem;
           border: 1px solid var(--slate-300);
           background: white;
-          color: #000000;
+          color: #1a1a1a;
           font-size: 1rem;
           font-weight: 500;
           outline: none;
