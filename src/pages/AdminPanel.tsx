@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 import type { Profile, Tenant } from '../types';
 import { useI18n } from '../hooks/useI18n';
 
-interface PendingUser extends Profile { email?: string }
+interface PendingUser extends Profile { email: string | null }
 
 export default function AdminPanel() {
     const navigate = useNavigate();

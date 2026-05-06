@@ -11,6 +11,20 @@ export type Priority = WoPriority;
 export type Category = WoCategory;
 
 // ── Supabase types ─────────────────────────────────────────────
+export interface Profile {
+  id: string;
+  tenant_id: string | null;
+  full_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  role: 'super_admin' | 'admin' | 'user';
+  status: 'pending' | 'active' | 'suspended';
+  company_name: string | null;
+  language: string;
+  theme: string;
+  created_at: string;
+}
+
 export interface Tenant {
   id: string;
   name: string;

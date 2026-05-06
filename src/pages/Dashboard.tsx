@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, PauseCircle, CheckCircle2, Plus, List, Inbox, SearchX, X, Filter, ChevronDown, CalendarDays } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
 import { useWorkOrders } from '../hooks/useWorkOrders';
 import { type WorkOrder, type Status, type Priority } from '../types';
 import StatusCard from '../components/StatusCard';
@@ -28,7 +26,6 @@ export default function Dashboard({ searchQuery }: DashboardProps) {
         createOrder, updateOrder, changeStatus, deleteOrder,
     } = useWorkOrders();
     const navigate = useNavigate();
-    const { tenant } = useAuth();
     const { t } = useI18n();
     const [filter, setFilter] = useState<ActiveFilter>('pendiente');
     const [view, setView] = useState<'grid' | 'list' | 'calendar'>('grid');

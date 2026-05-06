@@ -3,7 +3,6 @@ import { X, Save, Paperclip, FileText, User } from 'lucide-react';
 import type { NewOrderData } from '../hooks/useWorkOrders';
 import { type Priority, type Category, CATEGORY_LABELS } from '../types';
 import { useI18n } from '../hooks/useI18n';
-import { useAuth } from '../contexts/AuthContext';
 import DateInput from './DateInput';
 
 interface NewOrderModalProps {

@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Tenant } from '../types';
+import type { Tenant, Profile } from '../types';
 import type { Theme } from '../hooks/useTheme';
 
 interface AuthContextValue {
     session: any | null;
     user: any | null;
+    profile: Profile | null;
     tenant: Tenant | null;
     loading: boolean;
     isSuperAdmin: boolean;
@@ -24,21 +25,50 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<any | null>(null);
     const [user, setUser] = useState<any | null>(null);
+    const [profile, setProfile] = useState<Profile | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
     const [theme, setThemeState] = useState<Theme>(() => (localStorage.getItem('app-theme') as Theme) || 'azurite');
+
+    const fetchProfile = async (userId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*, tenant:tenants(*)')
+                .eq('id', userId)
+                .single();
+
+            if (error) throw error;
+            if (data) {
+                setProfile(data);
+                setTenant(data.tenant || null);
+            }
+        } catch (err) {
+            console.error('Error fetching profile:', err);
+        }
+    };
 
     useEffect(() => {
         // Handle auth state changes
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
-            setLoading(false);
+            if (session?.user) {
+                fetchProfile(session.user.id).finally(() => setLoading(false));
+            } else {
+                setLoading(false);
+            }
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
+            if (session?.user) {
+                fetchProfile(session.user.id);
+            } else {
+                setProfile(null);
+                setTenant(null);
+            }
             setLoading(false);
         });
 
@@ -68,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // No-op
     }
 
-    async function updateLanguage(lang: string) {
+    async function updateLanguage(_lang: string) {
         // No-op
     }
 
@@ -77,13 +107,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('app-theme', newTheme);
     }
 
-    const isSuperAdmin = user?.email === 'brunogst92@gmail.com';
-    const isAdmin = user?.email === 'brunogst92@gmail.com';
-    const isActive = true;
+    const isSuperAdmin = profile?.role === 'super_admin';
+    const isAdmin = profile?.role === 'admin' || isSuperAdmin;
+    const isActive = profile?.status === 'active';
 
     return (
         <AuthContext.Provider value={{
-            session, user, tenant, loading,
+            session, user, profile, tenant, loading,
             isSuperAdmin, isAdmin, isActive, theme, setTheme,
             signIn, signOut, refreshProfile, updateLanguage,
         }}>
