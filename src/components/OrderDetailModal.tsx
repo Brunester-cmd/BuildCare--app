@@ -38,7 +38,7 @@ const CATEGORIES = Object.keys(CATEGORY_LABELS) as Category[];
 export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, onChangeStatus }: OrderDetailModalProps) {
     const { t, lang } = useI18n();
     const [editing, setEditing] = useState(false);
-    const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+    const [previewFile, setPreviewFile] = useState<{ url: string; name: string; type: 'image' | 'pdf' } | null>(null);
     const [form, setForm] = useState<{
         titulo: string;
         descripcion: string;
@@ -405,11 +405,15 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                                     <div
                                                         className="attachment-thumb-container"
                                                         onClick={() => {
-                                                            if (att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-                                                                setFullScreenImage(att.url);
+                                                            const isImg = att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+                                                            const isPdf = att.url.match(/\.pdf$/i);
+                                                            if (isImg) {
+                                                                setPreviewFile({ url: att.url, name: att.name, type: 'image' });
+                                                            } else if (isPdf) {
+                                                                setPreviewFile({ url: att.url, name: att.name, type: 'pdf' });
                                                             }
                                                         }}
-                                                        style={att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? { cursor: 'pointer' } : {}}
+                                                        style={att.url.match(/\.(jpeg|jpg|gif|png|webp|pdf)$/i) ? { cursor: 'pointer' } : {}}
                                                     >
                                                         {att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
                                                             <img
@@ -435,6 +439,14 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                                                             >
                                                                 {t.view_file}
                                                             </a>
+                                                            {att.url.match(/\.pdf$/i) && (
+                                                                <button 
+                                                                    className="btn btn-ghost btn-xs"
+                                                                    onClick={() => setPreviewFile({ url: att.url, name: att.name, type: 'pdf' })}
+                                                                >
+                                                                    Vista Previa
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -480,18 +492,31 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete, o
                 </div>
             </div>
 
-            {/* Fullscreen Image Overlay */}
-            {fullScreenImage && (
-                <div className="fullscreen-image-overlay" onClick={() => setFullScreenImage(null)}>
-                    <button className="fullscreen-image-close" onClick={() => setFullScreenImage(null)}>
-                        <X size={32} />
-                    </button>
-                    <img
-                        src={fullScreenImage}
-                        alt="Expanded attachment"
-                        className="fullscreen-image"
-                        onClick={(e) => e.stopPropagation()}
-                    />
+            {/* Fullscreen Preview Overlay */}
+            {previewFile && (
+                <div className="fullscreen-image-overlay" onClick={() => setPreviewFile(null)}>
+                    <div className="fullscreen-preview-header">
+                        <span className="preview-filename">{previewFile.name}</span>
+                        <button className="fullscreen-image-close" onClick={() => setPreviewFile(null)}>
+                            <X size={24} />
+                        </button>
+                    </div>
+                    <div className="preview-container" onClick={(e) => e.stopPropagation()}>
+                        {previewFile.type === 'image' ? (
+                            <img
+                                src={previewFile.url}
+                                alt={previewFile.name}
+                                className="fullscreen-image"
+                            />
+                        ) : (
+                            <iframe
+                                src={`${previewFile.url}#toolbar=0`}
+                                title={previewFile.name}
+                                className="fullscreen-pdf-iframe"
+                                style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }}
+                            />
+                        )}
+                    </div>
                 </div>
             )}
         </div>
