@@ -46,351 +46,484 @@ export default function Login() {
   };
 
   return (
-    <div className="login-page-wrapper">
-      <div className="login-card-premium">
-        <div className="login-header">
-          <div className="login-logo-container">
-            <LogIn size={32} className="login-logo-icon" />
+    <div className="login-split-container">
+      {/* Left Side: Branding & Visual */}
+      <div className="login-visual-side" style={{ backgroundImage: `url('file:///C:/Users/usuario/.gemini/antigravity/brain/cfb7f35c-ad4b-4047-bd98-826b902a76b2/login_bg_premium_1778069310256.png')` }}>
+        <div className="visual-overlay"></div>
+        <div className="visual-content">
+          <div className="visual-logo">
+            <LogIn size={40} />
           </div>
-          <h1 className="login-brand">BuildCare</h1>
-          <p className="login-subtitle">
-            {mode === 'login' ? 'Bienvenido/a de nuevo' : 'Únete a BuildCare'}
+          <h1 className="visual-title">BuildCare</h1>
+          <p className="visual-description">
+            Gestión Inteligente de Órdenes de Trabajo para el Mantenimiento del Mañana.
           </p>
+          <div className="visual-stats">
+            <div className="stat-item">
+              <span className="stat-value">+10k</span>
+              <span className="stat-label">Órdenes Gestionadas</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <span className="stat-value">24/7</span>
+              <span className="stat-label">Soporte IA Activo</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {error && (
-          <div className="login-alert login-alert-error">
-            <AlertCircle size={16} />
-            <span>{error}</span>
+      {/* Right Side: Form */}
+      <div className="login-form-side">
+        <div className="form-container-inner">
+          <div className="form-header">
+            <h2 className="form-title">
+              {mode === 'login' ? 'Bienvenido de nuevo' : 'Crear Cuenta'}
+            </h2>
+            <p className="form-subtitle">
+              {mode === 'login' 
+                ? 'Ingresa tus credenciales para acceder a tu panel de control.' 
+                : 'Completa los datos para registrarte en la plataforma BuildCare.'}
+            </p>
           </div>
-        )}
 
-        {message && (
-          <div className="login-alert login-alert-success">
-            <Check size={16} />
-            <span>{message}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="login-form">
-          {mode === 'register' && (
-            <div className="input-group">
-              <label htmlFor="fullName">Nombre completo</label>
-              <div className="input-wrapper">
-                <UserCircle size={18} className="input-icon" />
-                <input
-                  id="fullName"
-                  type="text"
-                  required
-                  placeholder="Ej: Juan Pérez"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                />
-              </div>
+          {error && (
+            <div className="login-alert-premium error">
+              <AlertCircle size={18} />
+              <span>{error}</span>
             </div>
           )}
 
-          <div className="input-group">
-            <label htmlFor="email">Correo electrónico</label>
-            <div className="input-wrapper">
-              <Mail size={18} className="input-icon" />
-              <input
-                id="email"
-                type="email"
-                required
-                placeholder="nombre@ejemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+          {message && (
+            <div className="login-alert-premium success">
+              <Check size={18} />
+              <span>{message}</span>
             </div>
-          </div>
+          )}
 
-          <div className="input-group">
-            <label htmlFor="password">Contraseña</label>
-            <div className="input-wrapper">
-              <KeyRound size={18} className="input-icon" />
-              <input
-                id="password"
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <button type="submit" disabled={isLoading} className="login-submit-btn">
-            {isLoading ? (
-               <div className="btn-spinner" />
-            ) : (mode === 'login' ? "Entrar al Sistema" : "Crear Cuenta")}
-          </button>
-        </form>
-
-        <div className="login-footer">
-          <p>
-            {mode === 'login' ? (
-              <>
-                ¿No tienes una cuenta?{' '}
-                <button 
-                  type="button" 
-                  className="login-toggle-link"
-                  onClick={() => { setMode('register'); setError(null); setMessage(null); }}
-                >
-                  Regístrate aquí
-                </button>
-              </>
-            ) : (
-              <>
-                ¿Ya tienes una cuenta?{' '}
-                <button 
-                  type="button" 
-                  className="login-toggle-link"
-                  onClick={() => { setMode('login'); setError(null); setMessage(null); }}
-                >
-                  Inicia sesión
-                </button>
-              </>
+          <form onSubmit={handleSubmit} className="premium-form">
+            {mode === 'register' && (
+              <div className="premium-input-group">
+                <label>Nombre Completo</label>
+                <div className="input-with-icon">
+                  <UserCircle className="field-icon" size={20} />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej: Alejandro Magno"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </div>
+              </div>
             )}
-          </p>
+
+            <div className="premium-input-group">
+              <label>Correo Electrónico</label>
+              <div className="input-with-icon">
+                <Mail className="field-icon" size={20} />
+                <input
+                  type="email"
+                  required
+                  placeholder="nombre@empresa.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="premium-input-group">
+              <label>Contraseña</label>
+              <div className="input-with-icon">
+                <KeyRound className="field-icon" size={20} />
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {mode === 'login' && (
+              <div className="form-options">
+                <label className="remember-me">
+                  <input type="checkbox" />
+                  <span>Recordarme</span>
+                </label>
+                <button type="button" className="forgot-password">¿Olvidaste tu contraseña?</button>
+              </div>
+            )}
+
+            <button type="submit" disabled={isLoading} className="premium-submit-btn">
+              {isLoading ? (
+                <div className="loader-dots">
+                  <span></span><span></span><span></span>
+                </div>
+              ) : (
+                <>
+                  {mode === 'login' ? 'Iniciar Sesión' : 'Registrar Usuario'}
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="premium-footer">
+            <p>
+              {mode === 'login' ? (
+                <>
+                  ¿Aún no tienes cuenta?{' '}
+                  <button onClick={() => { setMode('register'); setError(null); setMessage(null); }}>
+                    Regístrate gratis
+                  </button>
+                </>
+              ) : (
+                <>
+                  ¿Ya eres miembro?{' '}
+                  <button onClick={() => { setMode('login'); setError(null); setMessage(null); }}>
+                    Inicia sesión ahora
+                  </button>
+                </>
+              )}
+            </p>
+          </div>
         </div>
       </div>
 
       <style>{`
-        .login-page-wrapper {
+        .login-split-container {
+          display: flex;
+          min-height: 100vh;
+          width: 100%;
+          background: #fff;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        /* Visual Side */
+        .login-visual-side {
+          flex: 1.2;
+          position: relative;
+          background-size: cover;
+          background-position: center;
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 100vh;
+          padding: 4rem;
+          color: white;
+          overflow: hidden;
+        }
+
+        @media (max-width: 1024px) {
+          .login-visual-side { display: none; }
+        }
+
+        .visual-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.8) 100%);
+        }
+
+        .visual-content {
+          position: relative;
+          z-index: 1;
+          max-width: 500px;
+        }
+
+        .visual-logo {
+          width: 64px;
+          height: 64px;
+          background: var(--amber-500);
+          border-radius: 1.25rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 2rem;
+          box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+        }
+
+        .visual-title {
+          font-size: 3.5rem;
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          margin-bottom: 1.5rem;
+          line-height: 1;
+        }
+
+        .visual-description {
+          font-size: 1.25rem;
+          color: var(--slate-300);
+          line-height: 1.6;
+          margin-bottom: 3rem;
+        }
+
+        .visual-stats {
+          display: flex;
+          gap: 2rem;
+          align-items: center;
+        }
+
+        .stat-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .stat-value {
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: white;
+        }
+
+        .stat-label {
+          font-size: 0.875rem;
+          color: var(--slate-400);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .stat-divider {
+          width: 1px;
+          height: 40px;
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Form Side */
+        .login-form-side {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4rem 2rem;
+          background: #fafafa;
+        }
+
+        .form-container-inner {
           width: 100%;
-          background: radial-gradient(circle at top right, var(--slate-100), var(--slate-200));
-          padding: 1.5rem;
+          max-width: 440px;
         }
 
-        .login-card-premium {
-          background: white;
-          padding: 2.5rem;
-          border-radius: 1.5rem;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-          width: 100%;
-          maxWidth: 420px;
-          border: 1px solid var(--slate-200);
-          animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-header {
-          text-align: center;
+        .form-header {
           margin-bottom: 2.5rem;
         }
 
-        .login-logo-container {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 56px;
-          height: 56px;
-          border-radius: 1rem;
-          background: linear-gradient(135deg, var(--amber-500), var(--amber-600));
-          color: white;
-          margin-bottom: 1.25rem;
-          box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
-        }
-
-        .login-brand {
-          font-size: 1.75rem;
+        .form-title {
+          font-size: 2.25rem;
           font-weight: 800;
           color: var(--slate-900);
-          letter-spacing: -0.025em;
-          margin: 0;
+          letter-spacing: -0.02em;
+          margin-bottom: 0.75rem;
         }
 
-        .login-subtitle {
+        .form-subtitle {
           color: var(--slate-500);
-          margin-top: 0.5rem;
-          font-size: 0.95rem;
-          font-weight: 500;
+          font-size: 1.05rem;
+          line-height: 1.5;
         }
 
-        .login-alert {
+        .login-alert-premium {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.875rem 1rem;
-          border-radius: 0.75rem;
-          margin-bottom: 1.5rem;
-          font-size: 0.85rem;
+          padding: 1rem 1.25rem;
+          border-radius: 1rem;
+          margin-bottom: 2rem;
+          font-size: 0.95rem;
           font-weight: 500;
+          animation: shake 0.4s ease-in-out;
         }
 
-        .login-alert-error {
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+
+        .login-alert-premium.error {
           background: #fef2f2;
           border: 1px solid #fee2e2;
-          color: #dc2626;
+          color: #b91c1c;
         }
 
-        .login-alert-success {
+        .login-alert-premium.success {
           background: #f0fdf4;
           border: 1px solid #dcfce7;
-          color: #16a34a;
+          color: #15803d;
         }
 
-        .login-form {
+        .premium-form {
           display: flex;
           flex-direction: column;
-          gap: 1.25rem;
+          gap: 1.5rem;
         }
 
-        .input-group label {
+        .premium-input-group label {
           display: block;
-          font-size: 0.85rem;
-          font-weight: 600;
+          font-size: 0.9rem;
+          font-weight: 700;
           color: var(--slate-700);
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.6rem;
         }
 
-        .input-wrapper {
+        .input-with-icon {
           position: relative;
         }
 
-        .input-icon {
+        .field-icon {
           position: absolute;
-          left: 1rem;
+          left: 1.25rem;
           top: 50%;
           transform: translateY(-50%);
           color: var(--slate-400);
-          pointer-events: none;
-          transition: color 0.2s;
+          transition: color 0.3s;
         }
 
-        .input-wrapper input {
+        .input-with-icon input {
           width: 100%;
-          padding: 0.875rem 1rem 0.875rem 2.75rem;
-          border-radius: 0.75rem;
+          padding: 1.125rem 1.25rem 1.125rem 3.5rem;
+          border-radius: 1rem;
           border: 1px solid var(--slate-200);
-          background: var(--slate-50);
-          color: var(--slate-900);
-          font-size: 0.95rem;
-          outline: none;
-          transition: all 0.2s;
-        }
-
-        .input-wrapper input:focus {
-          border-color: var(--amber-500);
           background: white;
-          box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+          color: var(--slate-900);
+          font-size: 1rem;
+          outline: none;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .input-wrapper input:focus + .input-icon {
+        .input-with-icon input:focus {
+          border-color: var(--amber-500);
+          box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1), 0 10px 15px -3px rgba(0,0,0,0.05);
+        }
+
+        .input-with-icon input:focus + .field-icon {
           color: var(--amber-500);
         }
 
-        .login-submit-btn {
+        .form-options {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: -0.5rem;
+        }
+
+        .remember-me {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+          color: var(--slate-600);
+          cursor: pointer;
+        }
+
+        .remember-me input {
+          accent-color: var(--amber-500);
+        }
+
+        .forgot-password {
+          background: none;
+          border: none;
+          color: var(--slate-500);
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        .forgot-password:hover {
+          color: var(--amber-600);
+        }
+
+        .premium-submit-btn {
           margin-top: 1rem;
           width: 100%;
-          padding: 1rem;
-          border-radius: 0.75rem;
+          padding: 1.125rem;
+          border-radius: 1rem;
           background: var(--slate-900);
           color: white;
-          font-weight: 600;
-          font-size: 1rem;
+          font-weight: 700;
+          font-size: 1.1rem;
           border: none;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s;
           display: flex;
           justify-content: center;
           align-items: center;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.3);
         }
 
-        .login-submit-btn:hover:not(:disabled) {
+        .premium-submit-btn:hover:not(:disabled) {
           background: black;
-          transform: translateY(-1px);
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+          box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.4);
         }
 
-        .login-submit-btn:active {
+        .premium-submit-btn:active {
           transform: translateY(0);
         }
 
-        .login-submit-btn:disabled {
+        .premium-submit-btn:disabled {
           opacity: 0.7;
           cursor: not-allowed;
         }
 
-        .login-footer {
-          margin-top: 2rem;
+        .premium-footer {
+          margin-top: 3rem;
           text-align: center;
-          padding-top: 1.5rem;
-          border-top: 1px solid var(--slate-100);
+          padding-top: 2rem;
+          border-top: 1px solid var(--slate-200);
         }
 
-        .login-footer p {
+        .premium-footer p {
           color: var(--slate-500);
-          font-size: 0.9rem;
-          margin: 0;
+          font-size: 1rem;
         }
 
-        .login-toggle-link {
+        .premium-footer button {
           background: none;
           border: none;
           color: var(--amber-600);
           font-weight: 700;
           cursor: pointer;
-          padding: 0;
-          margin-left: 0.25rem;
-          transition: color 0.2s;
+          margin-left: 0.35rem;
+          transition: all 0.2s;
         }
 
-        .login-toggle-link:hover {
+        .premium-footer button:hover {
           color: var(--amber-700);
           text-decoration: underline;
         }
 
-        .btn-spinner {
-          height: 1.25rem;
-          width: 1.25rem;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-top-color: white;
+        .loader-dots {
+          display: flex;
+          gap: 6px;
+        }
+
+        .loader-dots span {
+          width: 8px;
+          height: 8px;
+          background: white;
           border-radius: 50%;
-          animation: spin 0.8s linear infinite;
+          animation: dotPulse 1.4s infinite ease-in-out both;
         }
 
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        .loader-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loader-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes dotPulse {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1.0); }
         }
 
-        /* Dark mode compatibility */
-        html.dark .login-page-wrapper {
-          background: radial-gradient(circle at top right, #111827, #000000);
-        }
-
-        html.dark .login-card-premium {
-          background: #1f2937;
-          border-color: #374151;
-        }
-
-        html.dark .login-brand {
+        /* Dark Mode Support */
+        html.dark .login-split-container { background: #0f172a; }
+        html.dark .login-form-side { background: #0f172a; }
+        html.dark .form-title { color: white; }
+        html.dark .premium-input-group label { color: var(--slate-300); }
+        html.dark .input-with-icon input {
+          background: #1e293b;
+          border-color: #334155;
           color: white;
         }
-
-        html.dark .input-group label {
-          color: #d1d5db;
-        }
-
-        html.dark .input-wrapper input {
-          background: #111827;
-          border-color: #374151;
-          color: white;
-        }
-
-        html.dark .login-footer {
-          border-top-color: #374151;
-        }
+        html.dark .premium-footer { border-top-color: #334155; }
       `}</style>
     </div>
   );
