@@ -20,7 +20,7 @@ interface HeaderProps {
 export default function Header({ searchQuery, onSearchChange, onHistoryToggle, historyOpen }: HeaderProps) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { profile, tenant, isSuperAdmin, signOut, updateLanguage, theme, setTheme } = useAuth();
+    const { profile, tenant, isSuperAdmin, signOut, updateLanguage, theme, setTheme, refreshProfile } = useAuth();
     const { pushEnabled, loading: pushLoading, toggle: togglePush } = usePushNotifications(profile?.id);
     const { canInstall, promptInstall } = useInstallPrompt();
     const { t, lang } = useI18n();
@@ -61,12 +61,44 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
 
     async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file || !profile) return;
+        
         setUploadingAvatar(true);
-        // TODO: Upload avatar to Cloudflare R2 via Worker API when available
-        console.log('Avatar upload stubbed — Worker R2 integration pending', file.name);
-        setUploadingAvatar(false);
-        setUserMenuOpen(false);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${profile.id}/${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            // Upload the file to the 'avatars' bucket
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file, { upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            // Get the public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            // Update the profile in the database
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', profile.id);
+
+            if (updateError) throw updateError;
+
+            // Refresh the profile in the context
+            await refreshProfile();
+            
+        } catch (err) {
+            console.error('Error uploading avatar:', err);
+            alert('No se pudo subir la imagen de perfil');
+        } finally {
+            setUploadingAvatar(false);
+            setUserMenuOpen(false);
+        }
     }
 
     async function handleSignOut() {

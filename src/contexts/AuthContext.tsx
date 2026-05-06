@@ -107,11 +107,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function refreshProfile() {
-        // No-op
+        if (user) {
+            await fetchProfile(user.id);
+        }
     }
 
-    async function updateLanguage(_lang: string) {
-        // No-op
+    async function updateLanguage(lang: string) {
+        if (user) {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ language: lang })
+                .eq('id', user.id);
+            
+            if (!error) {
+                await refreshProfile();
+            }
+        }
     }
 
     async function setTheme(newTheme: Theme) {

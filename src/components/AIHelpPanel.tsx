@@ -78,7 +78,7 @@ export default function AIHelpPanel({ order }: AIHelpPanelProps) {
                 <button className="ai-help-btn" onClick={fetchAIHelp}>
                     <span className="ai-help-btn-shimmer" />
                     <Sparkles size={16} />
-                    <span>Ayuda IA</span>
+                    <span>Asistente IA</span>
                 </button>
             </div>
         );
