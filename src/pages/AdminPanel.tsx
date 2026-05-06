@@ -83,6 +83,7 @@ export default function AdminPanel() {
                 // Default to Sistema Principal if no company name is provided
                 targetTenantId = '00000000-0000-0000-0000-000000000000';
             }
+        }
 
             const { error: profError } = await supabase
                 .from('profiles')
