@@ -196,7 +196,7 @@ export default function Header({ searchQuery, onSearchChange, onHistoryToggle, h
                                     <div className="dropdown-submenu">
                                         {/* Cambiar contraseña */}
                                         <button className="dropdown-item dropdown-item--sub" onClick={() => {
-                                            alert('Cambio de contraseña pendiente — se implementará con Cloudflare Access.');
+                                            alert('Cambio de contraseña próximamente disponible.');
                                             setUserMenuOpen(false);
                                         }}>
                                             <Lock size={14} />
