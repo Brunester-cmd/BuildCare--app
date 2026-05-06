@@ -383,8 +383,9 @@ export default function Login() {
           border-radius: 1rem;
           border: 1px solid var(--slate-300);
           background: white;
-          color: var(--slate-900);
+          color: #000000;
           font-size: 1rem;
+          font-weight: 500;
           outline: none;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           box-shadow: 0 2px 4px rgba(0,0,0,0.02);
