@@ -306,11 +306,12 @@ export default function Login() {
         }
 
         .form-title {
-          font-size: 2.25rem;
-          font-weight: 800;
-          color: var(--slate-900);
-          letter-spacing: -0.02em;
+          font-size: 2.5rem;
+          font-weight: 900;
+          color: #000000;
+          letter-spacing: -0.04em;
           margin-bottom: 0.75rem;
+          line-height: 1.1;
         }
 
         .form-subtitle {
