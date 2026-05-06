@@ -308,14 +308,14 @@ export default function Login() {
         .form-title {
           font-size: 2.5rem;
           font-weight: 900;
-          color: #1a1a1a;
+          color: #2d3748;
           letter-spacing: -0.04em;
           margin-bottom: 0.75rem;
           line-height: 1.1;
         }
 
         .form-subtitle {
-          color: var(--slate-600);
+          color: #718096;
           font-size: 1.05rem;
           line-height: 1.5;
         }
@@ -360,7 +360,7 @@ export default function Login() {
           display: block;
           font-size: 0.9rem;
           font-weight: 700;
-          color: var(--slate-700);
+          color: #4a5568;
           margin-bottom: 0.6rem;
         }
 
@@ -373,7 +373,7 @@ export default function Login() {
           left: 1.25rem;
           top: 50%;
           transform: translateY(-50%);
-          color: var(--slate-400);
+          color: #a0aec0;
           transition: color 0.3s;
         }
 
@@ -381,9 +381,9 @@ export default function Login() {
           width: 100%;
           padding: 1.125rem 1.25rem 1.125rem 3.5rem;
           border-radius: 1rem;
-          border: 1px solid var(--slate-300);
+          border: 1px solid #e2e8f0;
           background: white;
-          color: #1a1a1a;
+          color: #2d3748;
           font-size: 1rem;
           font-weight: 500;
           outline: none;
@@ -397,7 +397,7 @@ export default function Login() {
         }
 
         .input-with-icon input::placeholder {
-          color: var(--slate-600);
+          color: #a0aec0;
           opacity: 1;
         }
 
