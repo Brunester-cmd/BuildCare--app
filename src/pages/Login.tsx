@@ -109,7 +109,7 @@ export default function Login() {
                   <input
                     type="text"
                     required
-                    placeholder="Ej: Alejandro Magno"
+                    placeholder="Nombre y Apellido"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                   />
@@ -124,7 +124,7 @@ export default function Login() {
                 <input
                   type="email"
                   required
-                  placeholder="nombre@empresa.com"
+                  placeholder="e-mail"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
