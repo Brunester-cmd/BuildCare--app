@@ -124,12 +124,16 @@ export default function AdminPanel() {
         if (!window.confirm(t.delete_user_confirm)) return;
         setLoading(true);
         try {
-            // Note: This only deletes the profile. Real deletion needs Edge Function or Admin API.
-            await supabase.from('profiles').delete().eq('id', id);
+            const { data, error } = await supabase.functions.invoke('admin-tasks', {
+                body: { action: 'delete-user', payload: { userId: id } }
+            });
+
+            if (error || data?.error) throw error || new Error(data.error);
+
             await load();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error deleting user:', err);
-            alert('Error al eliminar usuario');
+            alert(`Error al eliminar usuario: ${err.message}`);
         } finally {
             setLoading(false);
         }
@@ -156,14 +160,12 @@ export default function AdminPanel() {
         }
         setLoading(true);
         try {
-            // Note: For real user creation including Auth, you'd usually use supabase.auth.signUp
-            // but that might not work well for an admin panel without a custom Edge Function.
-            // Using signUp as a placeholder.
-            const { error } = await supabase.auth.signUp({
-                email: newUserForm.email,
-                password: newUserForm.password,
-                options: {
-                    data: {
+            const { data, error } = await supabase.functions.invoke('admin-tasks', {
+                body: {
+                    action: 'create-user',
+                    payload: {
+                        email: newUserForm.email,
+                        password: newUserForm.password,
                         full_name: newUserForm.fullName,
                         role: newUserForm.role,
                         tenant_id: newUserForm.tenant_id || null,
@@ -171,9 +173,9 @@ export default function AdminPanel() {
                 }
             });
 
-            if (error) throw error;
+            if (error || data?.error) throw error || new Error(data.error);
 
-            alert(`¡Usuario ${newUserForm.fullName} creado! Revisa el correo para confirmar.`);
+            alert(`¡Usuario ${newUserForm.fullName} creado correctamente!`);
             setAddingUser(false);
             setNewUserForm({ fullName: '', email: '', password: '', tenant_id: '', role: 'user' });
             await load();
