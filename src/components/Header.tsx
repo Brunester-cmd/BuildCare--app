@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useI18n } from '../hooks/useI18n';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
+import { supabase } from '../lib/supabase';
 
 interface HeaderProps {
     searchQuery: string;
